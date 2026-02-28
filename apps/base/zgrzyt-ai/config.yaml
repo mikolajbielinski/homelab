@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ytdlp-config
+  namespace: zgrzyt-ai
+data:
+  urls.txt: |
+    https://www.youtube.com/@ZgrzytPodcast/videos
+
+  base.conf: |
+    -x
+    --audio-format mp3
+    --download-archive /data/archive.txt
+    -o /data/%(upload_date)s-%(title)s.%(ext)s
+    --batch-file /config/urls.txt
+
+  cron.conf: |
+    -x
+    --audio-format mp3
+    --download-archive /data/archive.txt
+    --playlist-items 1:5
+    -o /data/%(upload_date)s-%(title)s.%(ext)s
+    --batch-file /config/urls.txt

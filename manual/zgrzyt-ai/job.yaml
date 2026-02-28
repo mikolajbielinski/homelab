@@ -1,0 +1,39 @@
+# NIE WRZUCAJ DO REPO GITOPS
+# Odpal ręcznie: kubectl apply -f job-initial.yaml
+# Po zakończeniu możesz usunąć: kubectl delete -f job-initial.yaml
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: zgrzyt-download-all
+  namespace: zgrzyt-ai
+spec:
+  template:
+    spec:
+      containers:
+        - name: ytdlp
+          image: jauderho/yt-dlp:latest
+          command: ["yt-dlp"]
+          args:
+            - "--config-location"
+            - "/config/base.conf"
+          volumeMounts:
+            - name: audio
+              mountPath: /data
+            - name: config
+              mountPath: /config
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+      volumes:
+        - name: audio
+          persistentVolumeClaim:
+            claimName: zgrzyt-audio
+        - name: config
+          configMap:
+            name: ytdlp-config
+      restartPolicy: OnFailure

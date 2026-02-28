@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: zgrzyt-download-new
+  namespace: zgrzyt-ai
+spec:
+  schedule: "*/30 * * * *"
+  concurrencyPolicy: Forbid
+  suspend: true
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: ytdlp
+              image: jauderho/yt-dlp:latest
+              command: ["yt-dlp"]
+              args:
+                - "--config-location"
+                - "/config/cron.conf"
+              volumeMounts:
+                - name: audio
+                  mountPath: /data
+                - name: config
+                  mountPath: /config
+              resources:
+                requests:
+                  memory: "128Mi"
+                  cpu: "100m"
+                limits:
+                  memory: "256Mi"
+                  cpu: "500m"
+          volumes:
+            - name: audio
+              persistentVolumeClaim:
+                claimName: zgrzyt-audio
+            - name: config
+              configMap:
+                name: ytdlp-config
+          restartPolicy: OnFailure
