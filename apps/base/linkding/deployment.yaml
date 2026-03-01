@@ -20,8 +20,8 @@ spec:
         - name: linkding
           image: sissbruecker/linkding:1.31.0
           envFrom:
-            secret:
-              secretName: linkding-superuser
+            - secretRef:
+                name: linkding-superuser
           ports:
             - containerPort: 9090
           securityContext:
