@@ -27,3 +27,8 @@ spec:
   values:
     grafana:
       adminPassword: admin
+      ingress:
+        enabled: true
+        ingressClassName: traefik
+        hosts:
+          - grafana.mbielinski.com
