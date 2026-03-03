@@ -10,7 +10,7 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./infrastructures/controllers/staging
+  path: ./infrastructure/controllers/staging
   prune: true
   decryption:
     provider: sops
