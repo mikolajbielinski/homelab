@@ -24,14 +24,18 @@ spec:
             - configMapRef:
                 name: audiobookshelf-config
           volumeMounts:
-            - mountsPath: /audiobooks
+            - mountPath: /audiobooks
               name: audiobookshelf-storage
-            - mountsPath: /podcasts
+              subPath: audiobooks
+            - mountPath: /podcasts
               name: audiobookshelf-storage
-            - mountsPath: /config
+              subPath: podcasts
+            - mountPath: /config
               name: audiobookshelf-storage
-            - mountsPath: /metadata
+              subPath: config
+            - mountPath: /metadata
               name: audiobookshelf-storage
+              subPath: metadata
       volumes:
         - name: audiobookshelf-storage
           persistentVolumeClaim:
