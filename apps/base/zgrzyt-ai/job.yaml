@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: zgrzyt-download-all
+spec:
+  template:
+    spec:
+      containers:
+        - name: zgrzyt
+          image: ghcr.io/mikolajbielinski/zgrzyt:v1.0
+          volumeMounts:
+            - mountPath: /podcasts
+              name: zgrzyt-podcasts
+          envFrom:
+            - configMapRef:
+                name: zgrzyt-download-all-config
+      imagePullSecrets:
+        - name: ghcr-secret
+      volumes:
+        - name: audio
+          persistentVolumeClaim:
+            claimName: zgrzyt-podcasts
+      restartPolicy: OnFailure
