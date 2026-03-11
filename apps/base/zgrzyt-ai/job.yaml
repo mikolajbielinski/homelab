@@ -2,12 +2,13 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: zgrzyt-download-all
+  namespace: zgrzyt-ai
 spec:
   template:
     spec:
       containers:
         - name: zgrzyt
-          image: ghcr.io/mikolajbielinski/zgrzyt:v1.0
+          image: ghcr.io/mikolajbielinski/zgrzyt:latest
           volumeMounts:
             - mountPath: /podcasts
               name: zgrzyt-podcasts
@@ -17,7 +18,7 @@ spec:
       imagePullSecrets:
         - name: ghcr-secret
       volumes:
-        - name: audio
+        - name: zgrzyt-podcasts
           persistentVolumeClaim:
             claimName: zgrzyt-podcasts
       restartPolicy: OnFailure
