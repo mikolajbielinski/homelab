@@ -5,3 +5,11 @@ metadata:
 data:
   PODCAST_LIMIT: "9999"
   PODCAST_DIR: "/podcasts"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zgrzyt-download-newest-config
+data:
+  PODCAST_LIMIT: "1"
+  PODCAST_DIR: "/podcasts"

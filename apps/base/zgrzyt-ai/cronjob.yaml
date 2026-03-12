@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: zgrzyt-download-newest
+spec:
+  jobTemplate:
+    metadata:
+      name: zgrzyt-download-newest
+    spec:
+      template:
+        spec:
+          containers:
+            - image: ghcr.io/mikolajbielinski/zgrzyt:latest
+              name: zgrzyt-download-newest
+              volumeMounts:
+                - mountPath: /podcasts
+                  name: zgrzyt-podcasts
+              envFrom:
+                - configMapRef:
+                    name: zgrzyt-download-newest-config
+          imagePullSecrets:
+            - name: ghcr-secret
+          volumes:
+            - name: zgrzyt-podcasts
+              persistentVolumeClaim:
+                claimName: zgrzyt-podcasts
+          restartPolicy: OnFailure
+  schedule: '@hourly'
