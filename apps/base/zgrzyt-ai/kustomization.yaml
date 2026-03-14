@@ -5,3 +5,4 @@ resources:
   - secret.yaml
   - storage.yaml
   - configmap.yaml
+  - secret-aws.yaml
