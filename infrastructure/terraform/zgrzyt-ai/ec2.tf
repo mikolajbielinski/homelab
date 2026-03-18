@@ -89,9 +89,9 @@ resource "aws_spot_instance_request" "zgrzyt" {
   key_name                    = aws_key_pair.zgrzyt.key_name
   security_groups             = [aws_security_group.zgrzyt.name]
   iam_instance_profile        = aws_iam_instance_profile.zgrzyt_ec2.name
-  spot_type                   = "one-time"
-  wait_for_fulfillment        = true
-  instance_interruption_behavior = "terminate"
+  spot_type                      = "persistent"
+  wait_for_fulfillment           = true
+  instance_interruption_behavior = "stop"
 
   root_block_device {
     volume_size = 100
