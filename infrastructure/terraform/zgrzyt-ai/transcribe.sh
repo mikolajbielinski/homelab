@@ -1,3 +1,16 @@
+Content-Type: multipart/mixed; boundary="==BOUNDARY=="
+MIME-Version: 1.0
+
+--==BOUNDARY==
+Content-Type: text/cloud-config; charset="us-ascii"
+
+#cloud-config
+cloud_final_modules:
+  - [scripts-user, always]
+
+--==BOUNDARY==
+Content-Type: text/x-shellscript; charset="us-ascii"
+
 #!/bin/bash
 exec > /var/log/transcribe.log 2>&1
 set -euxo pipefail
@@ -66,6 +79,7 @@ echo "Found $TOTAL MP3 files"
 # Get already processed transcripts
 aws s3 ls "$BUCKET/transcripts/" 2>/dev/null | awk '{print $4}' | sed 's/\.json$//' > "$WORKDIR/done.txt" || true
 
+PROCESSED=0
 COUNT=0
 while IFS= read -r mp3_file; do
     video_id="$${mp3_file%.mp3}"
@@ -91,8 +105,18 @@ while IFS= read -r mp3_file; do
     # Cleanup local files
     rm "$WORKDIR/mp3/$mp3_file"
 
+    PROCESSED=$((PROCESSED + 1))
     echo "[$COUNT/$TOTAL] Done: $video_id"
 done < "$WORKDIR/all_mp3s.txt"
 
-echo "=== All done! Shutting down ==="
+echo "=== Processed $PROCESSED files ==="
+
+if [ "$PROCESSED" -eq 0 ]; then
+    echo "Nothing to process. Instance stays alive - run 'terraform destroy' to clean up."
+    exit 0
+fi
+
+echo "All done! Shutting down."
 shutdown -h now
+
+--==BOUNDARY==--
