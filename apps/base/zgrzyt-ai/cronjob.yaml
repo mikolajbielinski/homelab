@@ -10,7 +10,7 @@ spec:
       template:
         spec:
           containers:
-            - image: ghcr.io/mikolajbielinski/zgrzyt:latest
+            - image: ghcr.io/mikolajbielinski/zgrzyt-download:latest
               name: zgrzyt-download-newest
               volumeMounts:
                 - mountPath: /podcasts
