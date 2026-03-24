@@ -6,5 +6,9 @@ resources:
   - storage.yaml
   - configmap.yaml
   - aws-secret.yaml
+  - openai-secret.yaml
   - qdrant-repository.yaml
   - qdrant-release.yaml
+  - embed-configmap.yaml
+  - embed-storage.yaml
+  - embed-cronjob.yaml
