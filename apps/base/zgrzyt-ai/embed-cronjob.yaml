@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: zgrzyt-embed
+spec:
+  schedule: '@hourly'
+  jobTemplate:
+    metadata:
+      name: zgrzyt-embed
+    spec:
+      template:
+        spec:
+          containers:
+            - name: zgrzyt-embed
+              image: ghcr.io/mikolajbielinski/zgrzyt-embed:latest
+              volumeMounts:
+                - mountPath: /transcripts
+                  name: zgrzyt-transcripts
+              envFrom:
+                - configMapRef:
+                    name: zgrzyt-embed-config
+                - secretRef:
+                    name: aws-secret
+                - secretRef:
+                    name: openai-secret
+          imagePullSecrets:
+            - name: ghcr-secret
+          volumes:
+            - name: zgrzyt-transcripts
+              persistentVolumeClaim:
+                claimName: zgrzyt-transcripts
+          restartPolicy: OnFailure
