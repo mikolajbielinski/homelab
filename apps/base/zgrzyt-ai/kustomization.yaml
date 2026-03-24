@@ -6,3 +6,5 @@ resources:
   - storage.yaml
   - configmap.yaml
   - aws-secret.yaml
+  - qdrant-repository.yaml
+  - qdrant-release.yaml
