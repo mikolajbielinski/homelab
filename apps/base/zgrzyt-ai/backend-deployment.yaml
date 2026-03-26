@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zgrzyt-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zgrzyt-backend
+  template:
+    metadata:
+      labels:
+        app: zgrzyt-backend
+    spec:
+      containers:
+        - name: zgrzyt-backend
+          image: ghcr.io/mikolajbielinski/zgrzyt-backend:latest
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: zgrzyt-backend-config
+            - secretRef:
+                name: openai-secret
+      imagePullSecrets:
+        - name: ghcr-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zgrzyt-backend
+spec:
+  selector:
+    app: zgrzyt-backend
+  ports:
+    - port: 8000
+      targetPort: 8000

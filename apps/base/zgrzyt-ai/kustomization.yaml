@@ -12,3 +12,8 @@ resources:
   - embed-configmap.yaml
   - embed-storage.yaml
   - embed-cronjob.yaml
+  - backend-configmap.yaml
+  - backend-deployment.yaml
+  - frontend-configmap.yaml
+  - frontend-deployment.yaml
+  - frontend-ingress.yaml

@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zgrzyt-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zgrzyt-frontend
+  template:
+    metadata:
+      labels:
+        app: zgrzyt-frontend
+    spec:
+      containers:
+        - name: zgrzyt-frontend
+          image: ghcr.io/mikolajbielinski/zgrzyt-frontend:latest
+          ports:
+            - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: zgrzyt-frontend-config
+      imagePullSecrets:
+        - name: ghcr-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zgrzyt-frontend
+spec:
+  selector:
+    app: zgrzyt-frontend
+  ports:
+    - port: 80
+      targetPort: 80

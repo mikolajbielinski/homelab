@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: zgrzyt-frontend
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: zgrzyt.mbielinski.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: zgrzyt-frontend
+                port:
+                  number: 80
