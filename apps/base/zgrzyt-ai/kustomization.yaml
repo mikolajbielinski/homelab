@@ -5,6 +5,7 @@ resources:
   - secret.yaml
   - storage.yaml
   - configmap.yaml
+  - cronjob.yaml
   - aws-secret.yaml
   - openai-secret.yaml
   - qdrant-repository.yaml
