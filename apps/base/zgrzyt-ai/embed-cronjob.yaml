@@ -4,6 +4,9 @@ metadata:
   name: zgrzyt-embed
 spec:
   schedule: '@hourly'
+  # PAUZA: wstrzymane do czasu uzyskania zgod osob wystepujacych w podcascie.
+  # Bez tego embed wrzuca transkrypty (dane osob) do Qdranta. Zdejmij po podpisaniu zgod.
+  suspend: true
   jobTemplate:
     metadata:
       name: zgrzyt-embed
