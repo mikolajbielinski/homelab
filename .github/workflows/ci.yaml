@@ -15,8 +15,10 @@ jobs:
         run: |
           curl -sL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz \
             | tar xz -C /usr/local/bin kubeconform
-          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" \
-            | bash -s -- 5.4.3 /usr/local/bin
+          curl -sL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.4.3/kustomize_v5.4.3_linux_amd64.tar.gz" \
+            | tar xz -C /usr/local/bin kustomize
+          kustomize version
+          kubeconform -v
 
       - name: Build & validate
         run: |
