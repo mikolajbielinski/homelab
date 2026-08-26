@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: zgrzyt-reconciler
+spec:
+  schedule: '30 * * * *'
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 600
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: sync
+              image: amazon/aws-cli:2.17.0
+              command: ['/bin/sh', '/scripts/reconcile.sh']
+              envFrom:
+                - secretRef:
+                    name: aws-secret
+              volumeMounts:
+                - name: podcasts
+                  mountPath: /podcasts
+                  readOnly: true
+                - name: scripts
+                  mountPath: /scripts
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+          volumes:
+            - name: podcasts
+              persistentVolumeClaim:
+                claimName: zgrzyt-podcasts
+            - name: scripts
+              configMap:
+                name: zgrzyt-reconciler-script
