@@ -1,0 +1,70 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  manifests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup kustomize + kubeconform
+        run: |
+          curl -sL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz \
+            | tar xz -C /usr/local/bin kubeconform
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" \
+            | bash -s -- 5.4.3 /usr/local/bin
+
+      - name: Build & validate
+        run: |
+          for overlay in apps/staging \
+                         infrastructure/controllers/staging \
+                         monitoring/controllers/staging \
+                         monitoring/configs/staging; do
+            [ -d "$overlay" ] || continue
+            echo "::group::$overlay"
+            kustomize build "$overlay" | kubeconform -strict -ignore-missing-schemas -skip Secret -summary
+            echo "::endgroup::"
+          done
+
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.10.5"
+
+      - run: terraform fmt -check -recursive infrastructure/terraform
+
+      - name: terraform validate
+        working-directory: infrastructure/terraform/zgrzyt-ai
+        run: |
+          terraform init -backend=false
+          terraform validate
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Kazdy Secret musi byc zaszyfrowany SOPS-em
+        run: |
+          fail=0
+          for f in $(grep -rl '^kind: Secret' --include='*.yaml' .); do
+            if ! grep -q '^sops:' "$f"; then
+              echo "::error file=$f::Secret bez bloku sops — uruchom 'sops -e -i $f'"
+              fail=1
+            fi
+          done
+          exit $fail

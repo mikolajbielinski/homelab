@@ -84,11 +84,11 @@ resource "aws_iam_instance_profile" "zgrzyt_ec2" {
 }
 
 resource "aws_spot_instance_request" "zgrzyt" {
-  ami                         = data.aws_ami.deep_learning.id
-  instance_type               = "g4dn.xlarge"
-  key_name                    = aws_key_pair.zgrzyt.key_name
-  security_groups             = [aws_security_group.zgrzyt.name]
-  iam_instance_profile        = aws_iam_instance_profile.zgrzyt_ec2.name
+  ami                            = data.aws_ami.deep_learning.id
+  instance_type                  = "g4dn.xlarge"
+  key_name                       = aws_key_pair.zgrzyt.key_name
+  security_groups                = [aws_security_group.zgrzyt.name]
+  iam_instance_profile           = aws_iam_instance_profile.zgrzyt_ec2.name
   spot_type                      = "persistent"
   wait_for_fulfillment           = true
   instance_interruption_behavior = "stop"
