@@ -5,6 +5,14 @@ on:
   push:
     branches: [main]
 
+
+defaults:
+  run:
+    shell: bash -euo pipefail {0}
+
+permissions:
+  contents: read
+
 jobs:
   manifests:
     runs-on: ubuntu-latest
@@ -22,15 +30,24 @@ jobs:
 
       - name: Build & validate
         run: |
+          rc=0
           for overlay in apps/staging \
                          infrastructure/controllers/staging \
                          monitoring/controllers/staging \
                          monitoring/configs/staging; do
             [ -d "$overlay" ] || continue
             echo "::group::$overlay"
-            kustomize build "$overlay" | kubeconform -strict -ignore-missing-schemas -skip Secret -summary
+            if ! rendered=$(kustomize build "$overlay" 2>&1); then
+              echo "$rendered"
+              echo "::error file=$overlay/kustomization.yaml::kustomize build padl na $overlay — patrz log tej sekcji"
+              rc=1
+            elif ! printf '%s\n' "$rendered" | kubeconform -strict -ignore-missing-schemas -skip Secret -summary; then
+              echo "::error file=$overlay/kustomization.yaml::kubeconform znalazl niezgodnosc ze schematem w $overlay"
+              rc=1
+            fi
             echo "::endgroup::"
           done
+          exit $rc
 
   terraform:
     runs-on: ubuntu-latest
@@ -51,6 +68,9 @@ jobs:
 
   secrets:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         with:
