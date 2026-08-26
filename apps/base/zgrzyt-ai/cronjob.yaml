@@ -3,6 +3,11 @@ kind: CronJob
 metadata:
   name: zgrzyt-download-newest
 spec:
+  schedule: '0 * * * *'
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 600
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
   jobTemplate:
     metadata:
       name: zgrzyt-download-newest
@@ -18,6 +23,12 @@ spec:
               envFrom:
                 - configMapRef:
                     name: zgrzyt-download-newest-config
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  memory: 1Gi
           imagePullSecrets:
             - name: ghcr-secret
           volumes:
@@ -25,4 +36,3 @@ spec:
               persistentVolumeClaim:
                 claimName: zgrzyt-podcasts
           restartPolicy: OnFailure
-  schedule: '@hourly'

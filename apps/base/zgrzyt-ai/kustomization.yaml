@@ -6,6 +6,8 @@ resources:
   - storage.yaml
   - configmap.yaml
   - cronjob.yaml
+  - reconciler-configmap.yaml
+  - reconciler-cronjob.yaml
   - aws-secret.yaml
   - openai-secret.yaml
   - qdrant-repository.yaml
