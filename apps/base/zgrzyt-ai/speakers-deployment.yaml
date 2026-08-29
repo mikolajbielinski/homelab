@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zgrzyt-speakers
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zgrzyt-speakers
+  template:
+    metadata:
+      labels:
+        app: zgrzyt-speakers
+    spec:
+      containers:
+        - name: zgrzyt-speakers
+          image: ghcr.io/mikolajbielinski/zgrzyt-speakers:latest
+          ports:
+            - containerPort: 5200
+          envFrom:
+            - secretRef:
+                name: speakers-secret
+      imagePullSecrets:
+        - name: ghcr-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zgrzyt-speakers
+spec:
+  selector:
+    app: zgrzyt-speakers
+  ports:
+    - port: 5200
+      targetPort: 5200
