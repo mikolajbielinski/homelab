@@ -20,3 +20,5 @@ resources:
   - frontend-configmap.yaml
   - frontend-deployment.yaml
   - frontend-ingress.yaml
+  - speakers-deployment.yaml
+  - speakers-secret.yaml
