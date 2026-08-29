@@ -2,10 +2,6 @@ resource "aws_iam_user" "zgrzyt" {
   name = "zgrzyt-ai"
 }
 
-resource "aws_iam_access_key" "zgrzyt" {
-  user = aws_iam_user.zgrzyt.name
-}
-
 resource "aws_iam_user_policy" "zgrzyt_s3" {
   name = "zgrzyt-ai-s3-access"
   user = aws_iam_user.zgrzyt.name
