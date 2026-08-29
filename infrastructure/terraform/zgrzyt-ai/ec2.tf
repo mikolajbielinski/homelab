@@ -1,18 +1,3 @@
-data "aws_ami" "deep_learning" {
-  most_recent = true
-  owners      = ["amazon"]
-
-  filter {
-    name   = "name"
-    values = ["Deep Learning Base OSS Nvidia Driver GPU AMI (Ubuntu 22.04) *"]
-  }
-
-  filter {
-    name   = "architecture"
-    values = ["x86_64"]
-  }
-}
-
 resource "aws_key_pair" "zgrzyt" {
   key_name   = "zgrzyt-ai"
   public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO2uL9Odn/V4wF+ZWpWcXeWAuJyWPNlyAlBM98kDaKMX mikolaj.bielinski10@gmail.com"
@@ -84,7 +69,7 @@ resource "aws_iam_instance_profile" "zgrzyt_ec2" {
 }
 
 resource "aws_spot_instance_request" "zgrzyt" {
-  ami                            = data.aws_ami.deep_learning.id
+  ami                            = var.ami_id
   instance_type                  = "g4dn.xlarge"
   key_name                       = aws_key_pair.zgrzyt.key_name
   security_groups                = [aws_security_group.zgrzyt.name]
@@ -94,7 +79,7 @@ resource "aws_spot_instance_request" "zgrzyt" {
   instance_interruption_behavior = "stop"
 
   root_block_device {
-    volume_size = 100
+    volume_size = var.root_volume_size
     volume_type = "gp3"
   }
 
