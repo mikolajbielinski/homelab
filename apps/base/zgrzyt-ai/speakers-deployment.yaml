@@ -16,7 +16,7 @@ spec:
         - name: zgrzyt-speakers
           image: ghcr.io/mikolajbielinski/zgrzyt-speakers:latest
           ports:
-            - containerPort: 5200
+            - containerPort: 3000
           envFrom:
             - secretRef:
                 name: speakers-secret
@@ -32,4 +32,4 @@ spec:
     app: zgrzyt-speakers
   ports:
     - port: 5200
-      targetPort: 5200
+      targetPort: 3000
