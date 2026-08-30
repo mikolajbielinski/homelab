@@ -11,6 +11,6 @@ variable "ami_id" {
 }
 
 variable "root_volume_size" {
-  type        = number
-  default     = 100
+  type    = number
+  default = 100
 }

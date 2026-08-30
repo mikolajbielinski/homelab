@@ -8,15 +8,15 @@ data:
     set -eu
 
     echo "=== reconciler start: $(date -u +%FT%TZ) ==="
-    echo "Plikow na PVC: $(ls /podcasts/*.mp3 2>/dev/null | wc -l)"
+    echo "Files on PVC: $(ls /podcasts/*.mp3 2>/dev/null | wc -l)"
 
     RECENT=$(find /podcasts -maxdepth 1 -name '*.mp3' -mmin -20 -printf '--exclude=%f ')
     if [ -n "$RECENT" ]; then
-        echo "Pomijam swieze (prawdopodobnie w trakcie konwersji): $RECENT"
+        echo "Skipping recent files (ffmpeg may still be writing them): $RECENT"
     fi
 
     aws s3 sync /podcasts s3://zgrzyt-ai/mp3/ \
         --exclude '*' --include '*.mp3' $RECENT \
         --no-progress
 
-    echo "=== reconciler koniec: $(date -u +%FT%TZ) ==="
+    echo "=== reconciler end: $(date -u +%FT%TZ) ==="
