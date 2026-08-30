@@ -91,5 +91,7 @@ data:
       service: http://linkding.linkding.svc.cluster.local:9090
     - hostname: speakers.mbielinski.com
       service: http://zgrzyt-speakers.zgrzyt-ai.svc.cluster.local:5200
+    - hostname: ntfy.mbielinski.com
+      service: http://ntfy.ntfy.svc.cluster.local:80
     # This rule matches any traffic which didn't match a previous rule, and responds with HTTP 404.
     - service: http_status:404
