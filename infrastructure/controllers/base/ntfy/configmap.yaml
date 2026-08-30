@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ntfy
+data:
+  server.yml: |
+    base-url: https://ntfy.mbielinski.com
+    listen-http: ":80"
+    behind-proxy: true
+
+    auth-file: /var/lib/ntfy/auth.db
+    auth-default-access: deny-all
+
+    cache-file: /var/lib/ntfy/cache.db
+    cache-duration: 12h
+
+    attachment-cache-dir: ""
+    enable-signup: false
+    enable-login: true
