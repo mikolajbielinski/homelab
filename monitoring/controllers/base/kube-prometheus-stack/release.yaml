@@ -29,6 +29,32 @@ spec:
       alertmanagerSpec:
         configSecret: alertmanager-ntfy
     grafana:
+      dashboardProviders:
+        dashboardproviders.yaml:
+          apiVersion: 1
+          providers:
+            - name: default
+              orgId: 1
+              folder: ""
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/default
+      dashboards:
+        default:
+          node-exporter-full:
+            gnetId: 1860
+            revision: 45
+            datasource: Prometheus
+          kube-state-metrics-v2:
+            gnetId: 13332
+            revision: 12
+            datasource: Prometheus
+          logs-app:
+            gnetId: 13639
+            revision: 2
+            datasource: Loki
       additionalDataSources:
         - name: Loki
           type: loki
