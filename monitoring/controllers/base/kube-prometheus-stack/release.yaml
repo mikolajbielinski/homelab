@@ -29,6 +29,14 @@ spec:
       alertmanagerSpec:
         configSecret: alertmanager-ntfy
     grafana:
+      additionalDataSources:
+        - name: Loki
+          type: loki
+          uid: loki
+          url: http://loki.monitoring.svc.cluster.local:3100
+          access: proxy
+          jsonData:
+            maxLines: 1000
       admin:
         existingSecret: grafana-admin-secret
         userKey: admin-user
