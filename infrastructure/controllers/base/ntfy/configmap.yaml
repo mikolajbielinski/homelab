@@ -8,6 +8,8 @@ data:
     listen-http: ":80"
     behind-proxy: true
 
+    upstream-base-url: "https://ntfy.sh"
+
     auth-file: /var/lib/ntfy/auth.db
     auth-default-access: deny-all
 
