@@ -4,8 +4,7 @@ metadata:
   name: zgrzyt-embed-config
 data:
   S3_BUCKET: "zgrzyt-ai"
-  S3_PREFIX: "transcripts/"
-  TRANSCRIPTS_DIR: "/transcripts"
+  S3_PREFIX: "transcripts/labeled/"
   QDRANT_URL: "http://qdrant.zgrzyt-ai.svc.cluster.local:6333"
   COLLECTION_NAME: "zgrzyt-transcripts"
   CHUNK_MAX_TOKENS: "500"

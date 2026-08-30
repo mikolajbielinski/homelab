@@ -16,9 +16,6 @@ spec:
           containers:
             - name: zgrzyt-embed
               image: ghcr.io/mikolajbielinski/zgrzyt-embed:latest
-              volumeMounts:
-                - mountPath: /transcripts
-                  name: zgrzyt-transcripts
               envFrom:
                 - configMapRef:
                     name: zgrzyt-embed-config
@@ -28,8 +25,4 @@ spec:
                     name: openai-secret
           imagePullSecrets:
             - name: ghcr-secret
-          volumes:
-            - name: zgrzyt-transcripts
-              persistentVolumeClaim:
-                claimName: zgrzyt-transcripts
           restartPolicy: OnFailure
