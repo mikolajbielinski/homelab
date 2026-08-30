@@ -81,19 +81,7 @@ resource "aws_instance" "zgrzyt" {
   vpc_security_group_ids = [aws_security_group.zgrzyt.id]
   iam_instance_profile   = aws_iam_instance_profile.zgrzyt_ec2.name
 
-  # TEMPORARY: the account has a 0 vCPU quota for on-demand G instances, so we run on
-  # spot for now. Spot cannot be stopped unless the request is persistent, and a
-  # persistent request restarts the instance by itself after every shutdown - so the
-  # machine terminates instead. Spot defaults to terminate and AWS rejects setting
-  # instance_initiated_shutdown_behavior on it, so the attribute is omitted here.
-  # Add it back as "stop" together with on-demand once the quota lands.
-  instance_market_options {
-    market_type = "spot"
-
-    spot_options {
-      spot_instance_type = "one-time"
-    }
-  }
+  instance_initiated_shutdown_behavior = "stop"
 
   root_block_device {
     volume_size = var.root_volume_size
@@ -122,8 +110,5 @@ resource "aws_cloudwatch_metric_alarm" "zgrzyt_idle" {
   comparison_operator = "LessThanThreshold"
   dimensions          = { InstanceId = aws_instance.zgrzyt.id }
   treat_missing_data  = "notBreaching"
-  # Must match instance_initiated_shutdown_behavior above: a one-time spot instance
-  # cannot be stopped, so the alarm terminates it instead. Switch back to :stop when
-  # the on-demand quota lands.
-  alarm_actions = ["arn:aws:automate:eu-central-1:ec2:terminate"]
+  alarm_actions       = ["arn:aws:automate:eu-central-1:ec2:stop"]
 }
