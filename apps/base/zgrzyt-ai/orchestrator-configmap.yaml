@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zgrzyt-orchestrator-config
+data:
+  S3_BUCKET: zgrzyt-ai
+  AWS_DEFAULT_REGION: eu-central-1
+  NTFY_URL: https://ntfy.mbielinski.com
+  NTFY_TOPIC: zgrzyt
+  EC2_INSTANCE_TAG: zgrzyt-ai
+  EC2_MAX_RUNTIME_HOURS: "10"

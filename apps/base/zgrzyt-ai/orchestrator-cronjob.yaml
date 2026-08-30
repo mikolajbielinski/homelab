@@ -18,19 +18,10 @@ spec:
             - name: orchestrator
               image: ghcr.io/mikolajbielinski/zgrzyt-orchestrator:latest
               envFrom:
+                - configMapRef:
+                    name: zgrzyt-orchestrator-config
                 - secretRef:
                     name: orchestrator-secret
-              env:
-                - name: S3_BUCKET
-                  value: zgrzyt-ai
-                - name: AWS_DEFAULT_REGION
-                  value: eu-central-1
-                - name: NTFY_URL
-                  value: https://ntfy.mbielinski.com
-                - name: NTFY_TOPIC
-                  value: zgrzyt
-                - name: EC2_INSTANCE_TAG
-                  value: zgrzyt-ai
               resources:
                 requests:
                   cpu: 10m
