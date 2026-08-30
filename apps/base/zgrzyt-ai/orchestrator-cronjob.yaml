@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: zgrzyt-orchestrator
+spec:
+  schedule: '*/15 * * * *'
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 300
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: orchestrator
+              image: ghcr.io/mikolajbielinski/zgrzyt-orchestrator:latest
+              envFrom:
+                - secretRef:
+                    name: orchestrator-secret
+              env:
+                - name: S3_BUCKET
+                  value: zgrzyt-ai
+                - name: AWS_DEFAULT_REGION
+                  value: eu-central-1
+                - name: NTFY_URL
+                  value: https://ntfy.mbielinski.com
+                - name: NTFY_TOPIC
+                  value: zgrzyt
+                - name: EC2_INSTANCE_TAG
+                  value: zgrzyt-ai
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 64Mi
+                limits:
+                  memory: 256Mi
+          imagePullSecrets:
+            - name: ghcr-secret
