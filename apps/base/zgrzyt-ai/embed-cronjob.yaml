@@ -21,7 +21,7 @@ spec:
                 - configMapRef:
                     name: zgrzyt-embed-config
                 - secretRef:
-                    name: aws-secret
+                    name: embed-aws-secret
                 - secretRef:
                     name: openai-secret
           imagePullSecrets:

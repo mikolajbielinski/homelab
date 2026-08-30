@@ -20,7 +20,7 @@ spec:
               command: ['/bin/sh', '/scripts/reconcile.sh']
               envFrom:
                 - secretRef:
-                    name: aws-secret
+                    name: reconciler-aws-secret
               volumeMounts:
                 - name: podcasts
                   mountPath: /podcasts

@@ -12,6 +12,8 @@ resources:
   - orchestrator-cronjob.yaml
   - orchestrator-secret.yaml
   - aws-secret.yaml
+  - embed-aws-secret.yaml
+  - reconciler-aws-secret.yaml
   - openai-secret.yaml
   - qdrant-repository.yaml
   - qdrant-release.yaml
