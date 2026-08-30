@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: zgrzyt-orchestrator
+spec:
+  schedule: '*/15 * * * *'
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 300
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: orchestrator
+              image: ghcr.io/mikolajbielinski/zgrzyt-orchestrator:latest
+              envFrom:
+                - configMapRef:
+                    name: zgrzyt-orchestrator-config
+                - secretRef:
+                    name: orchestrator-secret
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 64Mi
+                limits:
+                  memory: 256Mi
+          imagePullSecrets:
+            - name: ghcr-secret

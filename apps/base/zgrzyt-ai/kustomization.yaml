@@ -8,6 +8,9 @@ resources:
   - cronjob.yaml
   - reconciler-configmap.yaml
   - reconciler-cronjob.yaml
+  - orchestrator-configmap.yaml
+  - orchestrator-cronjob.yaml
+  - orchestrator-secret.yaml
   - aws-secret.yaml
   - openai-secret.yaml
   - qdrant-repository.yaml

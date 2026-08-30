@@ -25,3 +25,46 @@ resource "aws_iam_user_policy" "zgrzyt_s3" {
     ]
   })
 }
+
+resource "aws_iam_user" "orchestrator" {
+  name = "zgrzyt-orchestrator"
+}
+
+resource "aws_iam_user_policy" "orchestrator" {
+  name = "zgrzyt-orchestrator-access"
+  user = aws_iam_user.orchestrator.name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket"]
+        Resource = [aws_s3_bucket.zgrzyt.arn]
+      },
+      {
+        Effect = "Allow"
+        Action = ["s3:PutObject", "s3:DeleteObject"]
+        Resource = [
+          "${aws_s3_bucket.zgrzyt.arn}/notified/*",
+          "${aws_s3_bucket.zgrzyt.arn}/alerted/*",
+        ]
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["ec2:DescribeInstances"]
+        Resource = ["*"]
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["ec2:StartInstances", "ec2:StopInstances"]
+        Resource = ["*"]
+        Condition = {
+          StringEquals = {
+            "ec2:ResourceTag/Name" = "zgrzyt-ai"
+          }
+        }
+      }
+    ]
+  })
+}
