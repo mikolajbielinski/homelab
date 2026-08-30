@@ -25,6 +25,9 @@ spec:
         target:
           kind: PrometheusRule
   values:
+    alertmanager:
+      alertmanagerSpec:
+        configSecret: alertmanager-ntfy
     grafana:
       admin:
         existingSecret: grafana-admin-secret
