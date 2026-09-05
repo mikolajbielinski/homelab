@@ -16,7 +16,7 @@ spec:
           restartPolicy: Never
           containers:
             - name: sync
-              image: amazon/aws-cli:2.17.0
+              image: amazon/aws-cli:2.36.40
               command: ['/bin/sh', '/scripts/reconcile.sh']
               envFrom:
                 - secretRef:
