@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: zgrzyt-speakers
-          image: ghcr.io/mikolajbielinski/zgrzyt-speakers:latest
+          image: ghcr.io/mikolajbielinski/zgrzyt-speakers:main@sha256:3ad8ffd8dd8c6b0bb62d96fed1a9733019110d834861d29a28e799cd58a1c7a5
           ports:
             - containerPort: 3000
           envFrom:
