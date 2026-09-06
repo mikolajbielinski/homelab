@@ -152,6 +152,11 @@ than implying full coverage:
 | Whether an image tag exists in the registry | not wired up yet |
 | `clusters/staging/` | plain `kustomize` cannot build it (no `kustomization.yaml` — Flux generates one at runtime). A typo in a `path:` here passes CI and fails in the cluster |
 
+The `zgrzyt-ai` images and Cloudflared are pinned to immutable digests in the Kubernetes
+manifests. The application images follow the moving `main` tag as `main@sha256:...`; Renovate
+detects a new digest and opens a pull request, and Flux deploys it only after merge. Cloudflared
+uses an explicit version together with a digest and is updated through the same review flow.
+
 ## Observability
 
 Prometheus and Grafana come from `kube-prometheus-stack`; Loki stores logs in `SingleBinary`
@@ -209,9 +214,6 @@ Things I know are missing or wrong.
   loses it.
 - **The overlay is called `staging` and it is production.** `zgrzyt.mbielinski.com` is public
   and costs real money. The name is a leftover.
-- **Own images are tagged `:latest`.** Third-party images are pinned; mine are not, so a deploy
-  is a manual `rollout restart` and there is no record of which build is running. CI already
-  produces `sha-` tags, so the fix is mostly wiring.
 - **The node itself is not in code.** Everything above k3s is reproducible; k3s and the OS
   underneath it were set up by hand.
 - **Grafana's TLS certificate is self-signed and was uploaded manually.** It is the one resource

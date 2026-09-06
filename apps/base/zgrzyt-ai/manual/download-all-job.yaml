@@ -8,7 +8,7 @@ spec:
     spec:
       containers:
         - name: zgrzyt
-          image: ghcr.io/mikolajbielinski/zgrzyt-download:latest
+          image: ghcr.io/mikolajbielinski/zgrzyt-download:main@sha256:bc0f74849a302d856cc468205f29ec24530f600649a4ea030a36affbb49db14f
           volumeMounts:
             - mountPath: /podcasts
               name: zgrzyt-podcasts
