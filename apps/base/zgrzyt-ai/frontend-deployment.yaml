@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: zgrzyt-frontend
-          image: ghcr.io/mikolajbielinski/zgrzyt-frontend:main@sha256:300461bb2645258aee1b0314d1581074a3dfea70911fc2e54634db833fffc778
+          image: ghcr.io/mikolajbielinski/zgrzyt-frontend:main@sha256:8c9dc4363e6ef2d25982a25f27f44976c1f4cb0c7f15c78f17c1afac25ac4890
           ports:
             - containerPort: 80
           envFrom:
