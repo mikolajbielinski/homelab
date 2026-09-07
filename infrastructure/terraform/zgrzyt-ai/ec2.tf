@@ -100,11 +100,8 @@ resource "aws_instance" "zgrzyt" {
     transcribe_worker = file("${path.module}/transcribe_worker.py")
   })
 
-  # cloud-init can cache scripts across boots; replace the worker on bootstrap
-  # changes so the deployed code always matches Terraform. Durable data is in S3.
   user_data_replace_on_change = true
 
-  # The boot script reads the secret immediately, so attach its policy first.
   depends_on = [
     aws_iam_role_policy.zgrzyt_ec2_huggingface,
     aws_iam_role_policy.zgrzyt_ec2_s3,

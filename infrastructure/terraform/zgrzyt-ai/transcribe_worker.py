@@ -75,7 +75,6 @@ def main(args=None):
     try:
         hf_token = load_hf_token()
     except Exception:
-        # Never print the response or exception: either may contain secret data.
         print(
             "Cannot load Hugging Face token. Check the EC2 role, network access, and "
             "the secret's AWSCURRENT value (plain-text hf_ token). Queue left for retry.",

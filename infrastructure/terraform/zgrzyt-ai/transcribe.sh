@@ -46,8 +46,6 @@ cat > "$WORKDIR/transcribe_worker.py" << 'EOFPY'
 ${transcribe_worker}
 EOFPY
 
-# Fail before touching the queue or installing GPU dependencies if the secret has
-# not been populated yet. The EXIT trap uploads the diagnostic and stops EC2.
 pip3 install 'boto3==1.42.49'
 python3 "$WORKDIR/transcribe_worker.py" --check-secret
 
@@ -89,7 +87,6 @@ while IFS= read -r mp3_file; do
         echo "[$COUNT/$TOTAL] OK: $video_id"
     else
         rc=$?
-        # A secret outage is a job configuration failure, not a failed audio file.
         if [ "$rc" -eq 78 ]; then
             echo "Secret unavailable; stopping without marking $video_id as failed"
             exit "$rc"

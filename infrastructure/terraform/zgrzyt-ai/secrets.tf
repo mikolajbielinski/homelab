@@ -1,7 +1,5 @@
 data "aws_region" "current" {}
 
-# Terraform owns the container and permissions only. Populate SecretString outside
-# Terraform as a plain-text HF token; never add a secret version or value data source.
 resource "aws_secretsmanager_secret" "huggingface" {
   name                    = "zgrzyt-ai/huggingface"
   description             = "Hugging Face read token for zgrzyt-ai diarization models"
