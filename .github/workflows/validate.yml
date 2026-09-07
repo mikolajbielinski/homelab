@@ -87,6 +87,12 @@ jobs:
       - name: Validate configuration
         run: terraform -chdir="$TF_PROJECT" validate
 
+      - name: Test worker scripts
+        run: |
+          if [ -d "$TF_PROJECT/tests" ]; then
+            python3 -m unittest discover -s "$TF_PROJECT/tests" -p 'test_*.py'
+          fi
+
   secrets:
     runs-on: ubuntu-latest
     timeout-minutes: 10

@@ -83,16 +83,29 @@ resource "aws_instance" "zgrzyt" {
 
   instance_initiated_shutdown_behavior = "stop"
 
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 1
+  }
+
   root_block_device {
     volume_size = var.root_volume_size
     volume_type = "gp3"
   }
 
   user_data = templatefile("${path.module}/transcribe.sh", {
-    hf_token = var.hf_token
+    hf_secret_arn     = aws_secretsmanager_secret.huggingface.arn
+    aws_region        = data.aws_region.current.name
+    transcribe_worker = file("${path.module}/transcribe_worker.py")
   })
 
-  user_data_replace_on_change = false
+  user_data_replace_on_change = true
+
+  depends_on = [
+    aws_iam_role_policy.zgrzyt_ec2_huggingface,
+    aws_iam_role_policy.zgrzyt_ec2_s3,
+  ]
 
   tags = {
     Name = "zgrzyt-ai"

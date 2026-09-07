@@ -196,6 +196,14 @@ that transcribes audio.
   the state, because the secret ended up in state as plaintext and Terraform kept reactivating
   keys I had deactivated by hand. Terraform owns the users and their policies; the key itself is
   created out of band with `aws iam create-access-key`.
+- **The Hugging Face token lives in AWS Secrets Manager.** Terraform creates the
+  `zgrzyt-ai/huggingface` secret and grants the EC2 role read access to that secret only;
+  its value is populated outside Terraform. `user_data` contains only the secret ARN.
+  The Python worker fetches `AWSCURRENT` through the instance role, using IMDSv2,
+  and passes the token directly to the diarization library without exporting it or
+  writing it to disk. Boot checks secret availability before processing the queue.
+  Missing or malformed values and retrieval failures stop the job without marking
+  audio files as failed; the shutdown trap still uploads diagnostics and stops EC2.
 - **One IAM user per component**, each scoped to the prefixes it actually touches. None of them
   has `DeleteObject` on data, and none can see another's prefix. The policies were verified with
   `aws iam simulate-principal-policy` and then with real S3 calls, including the ones that are
@@ -204,6 +212,7 @@ that transcribes audio.
 The fixed cost is about $8 a month for the 100 GiB EBS volume, which is billed whether the
 instance runs or not; GPU time is on top of that and depends on how much there is to transcribe.
 A budget alarm is set at $30 and fires at 85%, which leaves room for roughly 30 GPU hours.
+
 
 ## Known gaps
 

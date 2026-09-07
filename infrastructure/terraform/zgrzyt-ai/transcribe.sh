@@ -17,7 +17,8 @@ shutdown -h +480 "dead-man switch - 8h" || true
 
 exec > /var/log/transcribe.log 2>&1
 
-export HF_TOKEN="${hf_token}"
+export HF_SECRET_ARN="${hf_secret_arn}"
+export AWS_DEFAULT_REGION="${aws_region}"
 
 export PATH="/usr/local/bin:/usr/bin:$PATH"
 BUCKET="s3://zgrzyt-ai"
@@ -27,7 +28,6 @@ PROCESSED=0
 FAILED=0
 
 set -euo pipefail
-set -x
 
 cleanup() {
   rc=$?
@@ -42,46 +42,16 @@ trap cleanup EXIT
 
 mkdir -p "$WORKDIR/mp3" "$WORKDIR/transcripts"
 
+cat > "$WORKDIR/transcribe_worker.py" << 'EOFPY'
+${transcribe_worker}
+EOFPY
+
+pip3 install 'boto3==1.42.49'
+python3 "$WORKDIR/transcribe_worker.py" --check-secret
+
 echo "=== Installing dependencies ==="
 apt-get update -qq && apt-get install -y -qq ffmpeg
 pip3 install 'whisperx==3.8.6'
-
-cat > "$WORKDIR/transcribe_worker.py" << 'EOFPY'
-import sys
-import os
-import whisperx
-import json
-import gc
-import torch
-from whisperx.diarize import DiarizationPipeline
-
-audio_file = sys.argv[1]
-output_file = sys.argv[2]
-hf_token = os.environ["HF_TOKEN"]
-device = "cuda"
-
-model = whisperx.load_model("large-v3", device, compute_type="float16")
-audio = whisperx.load_audio(audio_file)
-result = model.transcribe(audio, batch_size=16, language="pl")
-
-model_a, metadata = whisperx.load_align_model(language_code="pl", device=device)
-result = whisperx.align(result["segments"], model_a, metadata, audio, device, return_char_alignments=False)
-del model_a
-gc.collect()
-torch.cuda.empty_cache()
-
-diarize_model = DiarizationPipeline(token=hf_token, device=device)
-diarize_segments = diarize_model(audio)
-result = whisperx.assign_word_speakers(diarize_segments, result)
-
-with open(output_file, "w", encoding="utf-8") as f:
-    json.dump(result["segments"], f, ensure_ascii=False, indent=2)
-
-del model
-gc.collect()
-torch.cuda.empty_cache()
-print("Transcription complete")
-EOFPY
 
 echo "=== List of items already completed (by prefix) ==="
 : > "$WORKDIR/done.txt"
@@ -117,6 +87,10 @@ while IFS= read -r mp3_file; do
         echo "[$COUNT/$TOTAL] OK: $video_id"
     else
         rc=$?
+        if [ "$rc" -eq 78 ]; then
+            echo "Secret unavailable; stopping without marking $video_id as failed"
+            exit "$rc"
+        fi
         FAILED=$((FAILED + 1))
         echo "[$COUNT/$TOTAL] FAILED (rc=$rc): $video_id - marking as failed"
         printf '{"id":"%s","rc":%s,"when":"%s","log":"logs/%s.log"}\n' \

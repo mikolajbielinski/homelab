@@ -1,9 +1,3 @@
-variable "hf_token" {
-  description = "HuggingFace token for pyannote diarization models"
-  type        = string
-  sensitive   = true
-}
-
 variable "ami_id" {
   description = "Deep Learning Base OSS Nvidia Driver GPU AMI (Ubuntu 22.04) 20260825"
   type        = string
