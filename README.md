@@ -192,10 +192,22 @@ that transcribes audio.
   shutdown never destroys the machine, and a CloudWatch alarm that stops it after 45 minutes
   under 5% CPU in case the script never gets that far. A `shutdown -h +480` dead-man switch is
   armed in the first line of the script and cancelled only on a clean exit.
+  Bootstrap changes replace the instance (`user_data_replace_on_change = true`) to
+  avoid reusing cloud-init's cached scripts. This recreates its root volume and
+  model cache; durable inputs and results live in S3. The orchestrator discovers
+  the current instance by its `Name` tag, not a fixed instance ID.
 - **Terraform does not manage access keys.** `aws_iam_access_key` was removed from the code and
   the state, because the secret ended up in state as plaintext and Terraform kept reactivating
   keys I had deactivated by hand. Terraform owns the users and their policies; the key itself is
   created out of band with `aws iam create-access-key`.
+- **The Hugging Face token lives in AWS Secrets Manager.** Terraform creates the
+  `zgrzyt-ai/huggingface` secret and grants the EC2 role read access to that secret only;
+  its value is populated outside Terraform. `user_data` contains only the secret ARN.
+  The Python worker fetches `AWSCURRENT` through the instance role, using IMDSv2,
+  and passes the token directly to the diarization library without exporting it or
+  writing it to disk. Boot checks secret availability before processing the queue.
+  Missing or malformed values and retrieval failures stop the job without marking
+  audio files as failed; the shutdown trap still uploads diagnostics and stops EC2.
 - **One IAM user per component**, each scoped to the prefixes it actually touches. None of them
   has `DeleteObject` on data, and none can see another's prefix. The policies were verified with
   `aws iam simulate-principal-policy` and then with real S3 calls, including the ones that are
@@ -204,6 +216,44 @@ that transcribes audio.
 The fixed cost is about $8 a month for the 100 GiB EBS volume, which is billed whether the
 instance runs or not; GPU time is on top of that and depends on how much there is to transcribe.
 A budget alarm is set at $30 and fires at 85%, which leaves room for roughly 30 GPU hours.
+
+### Hugging Face secret rollout and rotation
+
+1. Merge the change. Remove the obsolete `hf_token` assignment from local
+   `terraform.tfvars` and any `TF_VAR_hf_token` environment/CI settings. Do not put the
+   replacement token into Terraform inputs.
+2. In `infrastructure/terraform/zgrzyt-ai`, run `terraform init`, `terraform plan`,
+   and `terraform apply` while no transcription is running. The plan should create
+   the secret and its IAM policy, replace EC2 and its root volume, and update the
+   idle alarm to the new instance ID. Confirm any needed files on the old root
+   volume are already in S3; local files and the model cache are discarded.
+   The new EC2 instance requires IMDSv2. If it boots before the secret is populated, it
+   should log the configuration error and stop without consuming the queue.
+3. In the AWS Secrets Manager console, select region **eu-central-1** and the
+   existing **zgrzyt-ai/huggingface** secret. Add its value using **Plaintext**:
+   the new `hf_...` token alone, without JSON, quotes, or an `HF_TOKEN=` prefix.
+   Save it as the current version (`AWSCURRENT`). The Terraform output
+   `huggingface_secret_arn` identifies the secret. The operator needs permission to
+   write its value; the EC2 role intentionally has read access only.
+4. Use a read token scoped to the required Hugging Face models, with the relevant
+   gated-model access already accepted on the token owner's account. The startup
+   check validates retrieval and token format, not Hugging Face authorization.
+5. Start the stopped EC2 instance, or let the orchestrator start it for queued work.
+   Confirm a transcript is produced and the instance stops afterward. If EC2 was
+   already stopping after the initial boot, wait until it is stopped before starting.
+   Revoke the old token; old copies become unusable once revoked.
+
+For later rotations, update the same secret's current value outside Terraform.
+Each new worker process reads the current version; an in-progress transcription
+keeps its previously fetched token. Coordinate revocation with running work.
+No `terraform apply` is needed. Secret values must never be added to a Terraform
+secret-version resource, value data source, output, user data, or a debug log.
+
+Local worker checks (no AWS access or GPU required):
+
+```sh
+python3 -m unittest discover -s infrastructure/terraform/zgrzyt-ai/tests -p 'test_*.py'
+```
 
 ## Known gaps
 
