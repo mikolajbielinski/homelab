@@ -1,2 +1,9 @@
 /docs
 /todo
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+crash.log

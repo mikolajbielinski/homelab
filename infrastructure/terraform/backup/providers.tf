@@ -3,7 +3,7 @@ terraform {
 
   backend "s3" {
     bucket       = "homelab-lynx-tfstate"
-    key          = "zgrzyt-ai/terraform.tfstate"
+    key          = "backup/terraform.tfstate"
     region       = "eu-central-1"
     encrypt      = true
     use_lockfile = true
