@@ -137,10 +137,10 @@ jobs:
     steps:
       - name: Check every job
         run: |
-          manifests_success=${{ needs.manifests.result == 'success' || needs.manifests.result == 'skipped' }}
-          terraform_projects_success=${{ needs.terraform-projects.result == 'success' || needs.terraform-projects.result == 'skipped' }}
-          terraform_success=${{ needs.terraform.result == 'success' || needs.terraform.result == 'skipped' }}
-          secrets_success=${{ needs.secrets.result == 'success' || needs.secrets.result == 'skipped' }}
+          manifests_success=${{ needs.manifests.result == 'success' }}
+          terraform_projects_success=${{ needs.terraform-projects.result == 'success' }}
+          terraform_success=${{ needs.terraform.result == 'success' }}
+          secrets_success=${{ needs.secrets.result == 'success'}}
           if [ "$manifests_success" = "true" ] && \
             [ "$terraform_projects_success" = "true" ] && \
             [ "$terraform_success" = "true" ] && \
