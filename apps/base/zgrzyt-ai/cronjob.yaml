@@ -15,7 +15,7 @@ spec:
       template:
         spec:
           containers:
-            - image: ghcr.io/mikolajbielinski/zgrzyt-download:main@sha256:bc0f74849a302d856cc468205f29ec24530f600649a4ea030a36affbb49db14f
+            - image: ghcr.io/mikolajbielinski/zgrzyt-download:main@sha256:2cd191c02f00bb6fa6a7808cc3a2ca5c032f87658efac0ed6436ea946b70cd29
               name: zgrzyt-download-newest
               volumeMounts:
                 - mountPath: /podcasts
