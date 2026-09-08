@@ -96,7 +96,7 @@ resource "aws_instance" "zgrzyt" {
 
   user_data = templatefile("${path.module}/transcribe.sh", {
     hf_secret_arn     = aws_secretsmanager_secret.huggingface.arn
-    aws_region        = data.aws_region.current.name
+    aws_region        = data.aws_region.current.region
     transcribe_worker = file("${path.module}/transcribe_worker.py")
   })
 
