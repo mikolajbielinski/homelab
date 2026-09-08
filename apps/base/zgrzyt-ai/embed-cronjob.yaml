@@ -16,7 +16,7 @@ spec:
         spec:
           containers:
             - name: zgrzyt-embed
-              image: ghcr.io/mikolajbielinski/zgrzyt-embed:main@sha256:005348018d38f6d42d9564eb135692aff6016d39d70b3e8eccd449e77d06459a
+              image: ghcr.io/mikolajbielinski/zgrzyt-embed:main@sha256:e053129fb39115b0e03e58b917a8a894876b0257aa9e642bc9a3336184133503
               envFrom:
                 - configMapRef:
                     name: zgrzyt-embed-config
