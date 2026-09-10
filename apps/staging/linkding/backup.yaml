@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: linkding-backup
+spec:
+  schedule: 0 5 * * *
+  jobTemplate:
+    metadata:
+      name: linkding-backup
+    spec:
+      template:
+        metadata: {}
+        spec:
+          securityContext:
+            fsGroup: 33
+            runAsUser: 33
+            runAsGroup: 33
+          containers:
+            - image: sissbruecker/linkding:1.46.2
+              name: linkding-backup
+              command:
+                - /bin/bash
+                - /tmp/scripts/run-backup.bash
+              envFrom:
+                - secretRef:
+                    name: linkding-superuser
+              securityContext:
+                allowPrivilegeEscalation: false
+              env:
+                - name: BACKUP_DIR
+                  value: /tmp/backups-pvc/
+              volumeMounts:
+                - mountPath: /tmp/backups-pvc/
+                  name: backups
+                - mountPath: /etc/linkding/data
+                  name: linkding-data
+                - mountPath: /tmp/scripts
+                  name: scripts
+          restartPolicy: OnFailure
+          volumes:
+            - name: backups
+              persistentVolumeClaim:
+                claimName: backups
+            - name: linkding-data
+              persistentVolumeClaim:
+                claimName: linkding-data
+            - name: scripts
+              configMap:
+                name: backup-config
