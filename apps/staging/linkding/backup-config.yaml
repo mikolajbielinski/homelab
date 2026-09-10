@@ -7,10 +7,15 @@ data:
     #!/bin/bash
     set -euo pipefail
 
-    backup_date=$(date '+%Y-%m-%d_%H-%M-%S')
-    python manage.py full_backup /tmp/backup_${backup_date}.zip
-    cd "${BACKUP_DIR:?}"
-    mkdir linkding
-    mv /tmp/backup_${backup_date}.zip "${BACKUP_DIR:?}"/linkding/
+    backup_dir="${BACKUP_DIR:?}/linkding"
+    backup_file="backup_$(date '+%Y-%m-%d_%H-%M-%S').zip"
 
-    echo "Backup was succesful"
+    mkdir -p "${backup_dir}"
+
+    tmp_file="${backup_dir}/.${backup_file}.partial"
+    trap 'rm -f "${tmp_file}"' EXIT
+
+    python manage.py full_backup "${tmp_file}"
+    mv "${tmp_file}" "${backup_dir}/${backup_file}"
+
+    echo "Backup written to ${backup_dir}/${backup_file}"
