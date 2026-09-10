@@ -4,12 +4,12 @@ metadata:
   name: linkding-backup
 spec:
   schedule: 0 5 * * *
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
   jobTemplate:
-    metadata:
-      name: linkding-backup
     spec:
       template:
-        metadata: {}
         spec:
           securityContext:
             fsGroup: 33
@@ -21,16 +21,17 @@ spec:
               command:
                 - /bin/bash
                 - /tmp/scripts/run-backup.bash
-              envFrom:
-                - secretRef:
-                    name: linkding-superuser
-              securityContext:
-                allowPrivilegeEscalation: false
               env:
                 - name: BACKUP_DIR
-                  value: /tmp/backups-pvc/
+                  value: /tmp/backups-pvc
+              securityContext:
+                allowPrivilegeEscalation: false
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
               volumeMounts:
-                - mountPath: /tmp/backups-pvc/
+                - mountPath: /tmp/backups-pvc
                   name: backups
                 - mountPath: /etc/linkding/data
                   name: linkding-data

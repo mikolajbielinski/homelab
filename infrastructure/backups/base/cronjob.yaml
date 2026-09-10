@@ -4,26 +4,36 @@ metadata:
   name: upload-backups
 spec:
   schedule: 0 23 * * *
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
   jobTemplate:
-    metadata:
-      name: upload-backups
     spec:
       template:
-        metadata: {}
         spec:
           containers:
             - image: rclone/rclone:v1.75.1
               name: upload-backups
-              volumeMounts:
-                - mountPath: /backups
-                  name: backups
               envFrom:
                 - secretRef:
                     name: aws-secret
               command:
                 - /bin/sh
                 - -c
-                - rclone copy /backups :s3:homelab-lynx-backups/backups --s3-provider=AWS --s3-env-auth --s3-region=eu-central-1
+                - >-
+                  rclone copy /backups :s3:homelab-lynx-backups/auto-backups
+                  --s3-provider=AWS
+                  --s3-env-auth
+                  --s3-region=eu-central-1
+                  --s3-no-check-bucket
+                  --exclude "*.partial"
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+              volumeMounts:
+                - mountPath: /backups
+                  name: backups
           restartPolicy: OnFailure
           volumes:
             - name: backups
