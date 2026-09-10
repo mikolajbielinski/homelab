@@ -4,3 +4,5 @@ namespace: linkding
 resources:
   - ../../base/linkding/
   - ingress.yaml
+  - backup.yaml
+  - backup-config.yaml
