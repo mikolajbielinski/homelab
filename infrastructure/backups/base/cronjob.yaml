@@ -21,12 +21,13 @@ spec:
                 - /bin/sh
                 - -c
                 - >-
-                  rclone copy /backups :s3:homelab-lynx-backups/auto-backups
+                  rclone copy /backups :s3:homelab-lynx-backups/auto-backups/
                   --s3-provider=AWS
                   --s3-env-auth
                   --s3-region=eu-central-1
                   --s3-no-check-bucket
                   --exclude "*.partial"
+                  --exclude "**/.ssh/**"
               resources:
                 requests:
                   cpu: 50m
