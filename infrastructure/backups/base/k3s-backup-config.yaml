@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k3s-backup-config
+data:
+  run-backup.py: |
+    #!/usr/bin/env python3
+    import os
+    import shutil
+    import sqlite3
+    import tarfile
+    import tempfile
+    from contextlib import closing
+    from datetime import UTC, datetime
+    from pathlib import Path
+
+    source_db = Path("/host/k3s-db/state.db")
+    source_token = Path("/host/k3s-token")
+    source_config = Path("/host/k3s-config")
+    backup_dir = Path(os.environ["BACKUP_DIR"])
+    work_dir = Path("/work")
+
+    # Stop early instead of creating an archive that cannot be restored.
+    if not source_db.is_file():
+        raise SystemExit(f"K3s SQLite database not found at {source_db}")
+
+    if not source_token.is_file():
+        raise SystemExit(f"K3s server token not found at {source_token}")
+
+    backup_dir.mkdir(parents=True, exist_ok=True)
+    timestamp = datetime.now(UTC).strftime("%Y-%m-%d_%H-%M-%S")
+    backup_name = f"k3s_{timestamp}.tar.gz"
+    partial_path = backup_dir / f".{backup_name}.partial"
+    final_path = backup_dir / backup_name
+    partial_path.unlink(missing_ok=True)
+
+    try:
+        # Build the backup in a temporary directory before publishing it.
+        with tempfile.TemporaryDirectory(dir=work_dir) as temporary_directory:
+            archive_root = Path(temporary_directory) / "k3s"
+            database_dir = archive_root / "var/lib/rancher/k3s/server/db"
+            token_target = archive_root / "var/lib/rancher/k3s/server/token"
+            config_target = archive_root / "etc/rancher/k3s"
+            database_dir.mkdir(parents=True)
+            token_target.parent.mkdir(parents=True, exist_ok=True)
+            config_target.mkdir(parents=True)
+
+            database_target = database_dir / "state.db"
+            database_uri = f"file:{source_db}?mode=ro"
+
+            # SQLite creates a consistent copy while k3s is still writing to the database.
+            with closing(sqlite3.connect(database_uri, uri=True, timeout=30)) as source:
+                with closing(sqlite3.connect(database_target)) as destination:
+                    source.backup(destination)
+                    integrity = destination.execute("PRAGMA integrity_check").fetchone()
+
+            if integrity != ("ok",):
+                raise RuntimeError(f"K3s SQLite backup failed integrity check: {integrity}")
+
+            database_target.chmod(0o600)
+
+            # The original server token is required to decrypt the restored datastore.
+            shutil.copy2(source_token, token_target)
+            token_target.chmod(0o600)
+
+            # Copy user-managed configuration, but leave out the generated kubeconfig.
+            for relative_path in ("config.yaml", "config.yaml.d", "registries.yaml"):
+                source_path = source_config / relative_path
+                target_path = config_target / relative_path
+
+                if source_path.is_dir():
+                    shutil.copytree(source_path, target_path, symlinks=True)
+                elif source_path.is_file():
+                    shutil.copy2(source_path, target_path)
+
+            with tarfile.open(partial_path, "w:gz") as archive:
+                archive.add(archive_root, arcname="k3s", recursive=True)
+
+        # Verify that the archive contains the minimum files required for restore.
+        with tarfile.open(partial_path, "r:gz") as archive:
+            archived_paths = set(archive.getnames())
+
+        required_paths = {
+            "k3s/var/lib/rancher/k3s/server/db/state.db",
+            "k3s/var/lib/rancher/k3s/server/token",
+        }
+
+        if not required_paths.issubset(archived_paths):
+            raise RuntimeError("K3s archive is missing required restore files")
+
+        # Rename is atomic, so the uploader never sees an incomplete backup.
+        os.replace(partial_path, final_path)
+        print(f"K3s backup written to {final_path}")
+    finally:
+        partial_path.unlink(missing_ok=True)

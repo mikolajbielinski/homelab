@@ -1,0 +1,82 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: k3s-backup
+spec:
+  schedule: 0 3 * * *
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          automountServiceAccountToken: false
+          containers:
+            - name: k3s-backup
+              image: python:3.14-alpine@sha256:c6ead215bfd31f1e433d968853b7a769989117115b728874824e6c0a27cb96fc
+              command:
+                - python3
+                - /scripts/run-backup.py
+              env:
+                - name: BACKUP_DIR
+                  value: /backups/k3s/upload
+                - name: PYTHONDONTWRITEBYTECODE
+                  value: "1"
+                - name: SQLITE_TMPDIR
+                  value: /work
+                - name: TMPDIR
+                  value: /work
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+                runAsUser: 0
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+              volumeMounts:
+                - name: backups
+                  mountPath: /backups
+                - name: k3s-db
+                  mountPath: /host/k3s-db
+                  readOnly: true
+                - name: k3s-token
+                  mountPath: /host/k3s-token
+                  readOnly: true
+                - name: k3s-config
+                  mountPath: /host/k3s-config
+                  readOnly: true
+                - name: scripts
+                  mountPath: /scripts
+                  readOnly: true
+                - name: work
+                  mountPath: /work
+          restartPolicy: OnFailure
+          volumes:
+            - name: backups
+              persistentVolumeClaim:
+                claimName: backups
+            - name: k3s-db
+              hostPath:
+                path: /var/lib/rancher/k3s/server/db
+                type: Directory
+            - name: k3s-token
+              hostPath:
+                path: /var/lib/rancher/k3s/server/token
+                type: File
+            - name: k3s-config
+              hostPath:
+                path: /etc/rancher/k3s
+                type: Directory
+            - name: scripts
+              configMap:
+                name: k3s-backup-config
+                defaultMode: 0555
+            - name: work
+              emptyDir:
+                sizeLimit: 2Gi

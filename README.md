@@ -217,10 +217,8 @@ A budget alarm is set at $30 and fires at 85%, which leaves room for roughly 30 
 ## Known gaps
 
 Things I know are missing or wrong.
-- **No backups.** Every PVC is `local-path` on one node. Two of the four are recoverable by
-  design (the podcast archive re-syncs from S3, Qdrant rebuilds from the transcripts), which was
-  an architectural choice rather than luck — but linkding's database is not, and losing the disk
-  loses it.
+- **Restore drills are manual.** Linkding, Qdrant snapshots and the k3s SQLite datastore are
+  backed up daily to S3 with 14-day retention locally and 44 days in S3, and the podcast archive re-syncs from S3. Restore procedures are not tested automatically.
 - **The overlay is called `staging` and it is production.** `zgrzyt.mbielinski.com` is public
   and costs real money. The name is a leftover.
 - **The node itself is not in code.** Everything above k3s is reproducible; k3s and the OS
