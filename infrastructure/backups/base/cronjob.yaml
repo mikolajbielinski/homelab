@@ -28,6 +28,9 @@ spec:
                   --s3-no-check-bucket
                   --exclude "*.partial"
                   --exclude "**/.ssh/**"
+                  && rclone delete /backups
+                  --min-age 14d
+                  --include "*/upload/**"
               resources:
                 requests:
                   cpu: 50m
