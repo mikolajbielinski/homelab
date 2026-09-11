@@ -1,0 +1,71 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: qdrant-backup
+spec:
+  schedule: 0 4 * * *
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          automountServiceAccountToken: false
+          initContainers:
+            - name: prepare-backup-directory
+              image: curlimages/curl:8.16.0@sha256:463eaf6072688fe96ac64fa623fe73e1dbe25d8ad6c34404a669ad3ce1f104b6
+              command:
+                - /bin/sh
+                - -c
+                - >-
+                  mkdir -p /backups/qdrant/upload
+                  && chown 65532:65532 /backups/qdrant /backups/qdrant/upload
+                  && chmod 0750 /backups/qdrant /backups/qdrant/upload
+              securityContext:
+                allowPrivilegeEscalation: false
+                runAsUser: 0
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 16Mi
+              volumeMounts:
+                - name: backups
+                  mountPath: /backups
+          containers:
+            - name: qdrant-backup
+              image: curlimages/curl:8.16.0@sha256:463eaf6072688fe96ac64fa623fe73e1dbe25d8ad6c34404a669ad3ce1f104b6
+              command:
+                - /bin/sh
+                - /scripts/run-backup.sh
+              env:
+                - name: QDRANT_URL
+                  value: http://qdrant.zgrzyt-ai.svc.cluster.local:6333
+                - name: QDRANT_COLLECTION
+                  value: zgrzyt-transcripts
+                - name: BACKUP_DIR
+                  value: /backups/qdrant/upload
+              securityContext:
+                allowPrivilegeEscalation: false
+                runAsGroup: 65532
+                runAsUser: 65532
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+              volumeMounts:
+                - name: backups
+                  mountPath: /backups
+                - name: scripts
+                  mountPath: /scripts
+                  readOnly: true
+          restartPolicy: OnFailure
+          volumes:
+            - name: backups
+              persistentVolumeClaim:
+                claimName: backups
+            - name: scripts
+              configMap:
+                name: qdrant-backup-config
+                defaultMode: 0555

@@ -9,3 +9,7 @@ resources:
   - secret-ssh.yaml
   - configmap.yaml
   - service.yaml
+  - qdrant-backup-config.yaml
+  - qdrant-backup.yaml
+  - k3s-backup-config.yaml
+  - k3s-backup.yaml

@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qdrant-backup-config
+data:
+  run-backup.sh: |
+    #!/bin/sh
+    set -eu
+
+    snapshot_name=""
+    tmp_file=""
+
+    # Remove an incomplete download and the temporary snapshot after any failure.
+    cleanup() {
+      if [ -n "${tmp_file}" ]; then
+        rm -f "${tmp_file}"
+      fi
+
+      if [ -n "${snapshot_name}" ]; then
+        curl --fail --silent --show-error --request DELETE \
+          "${QDRANT_URL}/collections/${QDRANT_COLLECTION}/snapshots/${snapshot_name}?wait=true" \
+          >/dev/null || true
+      fi
+    }
+
+    trap cleanup EXIT
+    trap 'exit 130' INT
+    trap 'exit 143' TERM
+
+    # Ask Qdrant to create a consistent snapshot and wait until it is ready.
+    response="$(curl --fail --silent --show-error --request POST \
+      "${QDRANT_URL}/collections/${QDRANT_COLLECTION}/snapshots?wait=true")"
+
+    # Read the generated snapshot name from the Qdrant response.
+    snapshot_name="$(printf '%s\n' "${response}" | sed -n \
+      's/.*"name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')"
+
+    if [ -z "${snapshot_name}" ]; then
+      echo "Qdrant did not return a snapshot name" >&2
+      exit 1
+    fi
+
+    mkdir -p "${BACKUP_DIR}"
+    tmp_file="${BACKUP_DIR}/.${snapshot_name}.partial"
+
+    # Download to a partial file so the S3 uploader cannot see an incomplete backup.
+    curl --fail --silent --show-error \
+      --output "${tmp_file}" \
+      "${QDRANT_URL}/collections/${QDRANT_COLLECTION}/snapshots/${snapshot_name}"
+
+    if [ ! -s "${tmp_file}" ]; then
+        echo "Downloaded Qdrant snapshot is empty" >&2
+        exit 1
+    fi
+
+    # Publish the completed file atomically.
+    mv "${tmp_file}" "${BACKUP_DIR}/${snapshot_name}"
+    tmp_file=""
+
+    # Remove Qdrant's working copy after saving it on the backup volume.
+    curl --fail --silent --show-error --request DELETE \
+      "${QDRANT_URL}/collections/${QDRANT_COLLECTION}/snapshots/${snapshot_name}?wait=true" \
+      >/dev/null
+
+    echo "Qdrant snapshot written to ${BACKUP_DIR}/${snapshot_name}"
+    snapshot_name=""
