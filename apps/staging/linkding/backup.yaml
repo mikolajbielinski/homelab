@@ -13,38 +13,74 @@ spec:
         spec:
           securityContext:
             fsGroup: 33
-            runAsUser: 33
             runAsGroup: 33
-          containers:
+            runAsUser: 33
+          initContainers:
             - image: sissbruecker/linkding:1.46.2
               name: linkding-backup
               command:
                 - /bin/bash
                 - /tmp/scripts/run-backup.bash
-              env:
-                - name: BACKUP_DIR
-                  value: /tmp/backups-pvc
               securityContext:
                 allowPrivilegeEscalation: false
               resources:
                 requests:
                   cpu: 50m
                   memory: 128Mi
+              env:
+                - name: BACKUP_DIR
+                  value: /transfer
               volumeMounts:
-                - mountPath: /tmp/backups-pvc
-                  name: backups
                 - mountPath: /etc/linkding/data
                   name: linkding-data
                 - mountPath: /tmp/scripts
                   name: scripts
+                - mountPath: /transfer
+                  name: transfer-volume
+          containers:
+            - image: rclone/rclone:1.75.1
+              name: transfer-backup
+              command:
+                - rclone
+              args:
+                - copy
+                - /transfer/linkding
+                - :sftp:/upload
+                - --sftp-host=sftp-svc.backups.svc.cluster.local
+                - --sftp-user=linkding
+                - --sftp-port=22
+                - --sftp-key-file=/etc/sftp-client/key/sftp-private-key
+                - --sftp-known-hosts-file=/etc/sftp-client/hosts/known_hosts
+                - --sftp-host-key-algorithms=ssh-ed25519
+                - --sftp-shell-type=none
+                - --verbose
+              securityContext:
+                allowPrivilegeEscalation: false
+              volumeMounts:
+                - mountPath: /transfer
+                  name: transfer-volume
+                  readOnly: true
+                - name: sftp-private-key
+                  mountPath: /etc/sftp-client/key
+                  readOnly: true
+                - name: known-hosts
+                  mountPath: /etc/sftp-client/hosts
+                  readOnly: true
           restartPolicy: OnFailure
           volumes:
-            - name: backups
-              persistentVolumeClaim:
-                claimName: backups
             - name: linkding-data
               persistentVolumeClaim:
                 claimName: linkding-data
             - name: scripts
               configMap:
                 name: backup-config
+            - name: transfer-volume
+              emptyDir:
+                sizeLimit: 1Gi
+            - name: sftp-private-key
+              secret:
+                secretName: sftp-private-key
+                defaultMode: 0440
+            - name: known-hosts
+              configMap:
+                name: sftp-known-hosts

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: sftp-server
+  name: sftp-svc
+spec:
+  ports:
+    - name: sftp
+      port: 22
+      protocol: TCP
+      targetPort: sftp
+  selector:
+    app: sftp-server
+  type: ClusterIP
