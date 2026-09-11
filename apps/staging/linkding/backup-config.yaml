@@ -19,3 +19,11 @@ data:
     mv "${tmp_file}" "${backup_dir}/${backup_file}"
 
     echo "Backup written to ${backup_dir}/${backup_file}"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sftp-known-hosts
+data:
+  known_hosts: |
+    sftp-svc.backups.svc.cluster.local ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFb9bxTA3lP9JZzc25ucJIBiQedSwxzz0GNqKWyQoNJZ sftp-host

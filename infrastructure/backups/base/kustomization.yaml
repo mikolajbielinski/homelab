@@ -5,3 +5,7 @@ resources:
   - storage.yaml
   - secret.yaml
   - cronjob.yaml
+  - deployment.yaml
+  - secret-ssh.yaml
+  - configmap.yaml
+  - service.yaml

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: users-config
+data:
+  users.conf: |
+    linkding::1001:100:upload
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: users-ssh-public-keys
+data:
+  linkding-sftp.pub: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAION/s0NQJUzTrnYalOB3RKJmwnCCHER9Pfam+i5w8l4A linkding-backup

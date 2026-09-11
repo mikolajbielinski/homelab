@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: sftp-server
+  name: sftp-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sftp-server
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: sftp-server
+    spec:
+      containers:
+        - image: atmoz/sftp@sha256:0960390462a4441dbb63698d7c185b76a41ffcee7b78ff4adf275f3e66f9c475
+          name: sftp
+          ports:
+            - name: sftp
+              containerPort: 22
+          volumeMounts:
+            - name: backup-storage
+              mountPath: /home
+            - name: host-ssh-pk
+              mountPath: /etc/ssh/ssh_host_ed25519_key
+              subPath: ssh_host_ed25519_key
+              readOnly: true
+            - name: users-config
+              mountPath: /etc/sftp/users.conf
+              subPath: users.conf
+              readOnly: true
+
+            - name: linkding-public-key
+              mountPath: /home/linkding/.ssh/keys
+              readOnly: true
+          resources: {}
+      volumes:
+        - name: backup-storage
+          persistentVolumeClaim:
+            claimName: backups
+        - name: host-ssh-pk
+          secret:
+            secretName: sftp-ssh-pk
+            defaultMode: 0600
+        - name: users-config
+          configMap:
+            name: users-config
+        - name: linkding-public-key
+          configMap:
+            name: users-ssh-public-keys
+            items:
+              - key: linkding-sftp.pub
+                path: linkding-sftp.pub

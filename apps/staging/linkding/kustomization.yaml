@@ -6,3 +6,4 @@ resources:
   - ingress.yaml
   - backup.yaml
   - backup-config.yaml
+  - sftp-secret.yaml

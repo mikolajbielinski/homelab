@@ -29,7 +29,7 @@ resource "aws_iam_user_policy" "homelab_backups_auto" {
       {
         Sid      = "WriteObjects"
         Effect   = "Allow"
-        Action   = ["s3:PutObject", "s3:AbortMultipartUpload", "s3:ListMultipartUploadParts"]
+        Action   = ["s3:PutObject", "s3:GetObject", "s3:AbortMultipartUpload", "s3:ListMultipartUploadParts"]
         Resource = ["${aws_s3_bucket.homelab_backups.arn}/${local.backup_prefix}/*"]
       }
     ]
