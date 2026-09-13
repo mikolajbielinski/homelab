@@ -4,13 +4,21 @@ metadata:
   name: upload-backups
 spec:
   schedule: 0 23 * * *
+  timeZone: Europe/Warsaw
   concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 21600
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
   jobTemplate:
     spec:
+      activeDeadlineSeconds: 3600
+      backoffLimit: 2
       template:
         spec:
+          automountServiceAccountToken: false
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
           containers:
             - image: rclone/rclone:1.75.1
               name: upload-backups
@@ -35,10 +43,20 @@ spec:
                 requests:
                   cpu: 50m
                   memory: 128Mi
+                limits:
+                  memory: 512Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  add:
+                    - DAC_OVERRIDE
+                    - DAC_READ_SEARCH
+                  drop:
+                    - ALL
               volumeMounts:
                 - mountPath: /backups
                   name: backups
-          restartPolicy: OnFailure
+          restartPolicy: Never
           volumes:
             - name: backups
               persistentVolumeClaim:

@@ -4,6 +4,8 @@ metadata:
   labels:
     app: sftp-server
   name: sftp-server
+  annotations:
+    reloader.stakater.com/auto: "true"
 spec:
   replicas: 1
   selector:
@@ -15,6 +17,10 @@ spec:
       labels:
         app: sftp-server
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       initContainers:
         - name: fix-home-permissions
           image: atmoz/sftp@sha256:0960390462a4441dbb63698d7c185b76a41ffcee7b78ff4adf275f3e66f9c475
@@ -25,12 +31,41 @@ spec:
             - chmod
             - "755"
             - /home
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
       containers:
         - image: atmoz/sftp@sha256:0960390462a4441dbb63698d7c185b76a41ffcee7b78ff4adf275f3e66f9c475
           name: sftp
           ports:
             - name: sftp
               containerPort: 22
+          livenessProbe:
+            tcpSocket:
+              port: sftp
+            failureThreshold: 3
+            periodSeconds: 30
+            timeoutSeconds: 3
+          readinessProbe:
+            tcpSocket:
+              port: sftp
+            failureThreshold: 3
+            periodSeconds: 10
+            timeoutSeconds: 3
+          startupProbe:
+            tcpSocket:
+              port: sftp
+            failureThreshold: 18
+            periodSeconds: 5
+            timeoutSeconds: 3
           volumeMounts:
             - name: backup-storage
               mountPath: /home
@@ -46,7 +81,12 @@ spec:
             - name: linkding-public-key
               mountPath: /home/linkding/.ssh/keys
               readOnly: true
-          resources: {}
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 128Mi
       volumes:
         - name: backup-storage
           persistentVolumeClaim:

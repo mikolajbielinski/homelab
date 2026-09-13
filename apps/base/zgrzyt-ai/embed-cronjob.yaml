@@ -4,6 +4,7 @@ metadata:
   name: zgrzyt-embed
 spec:
   schedule: '@hourly'
+  timeZone: Europe/Warsaw
   concurrencyPolicy: Forbid
   startingDeadlineSeconds: 600
   successfulJobsHistoryLimit: 3
@@ -12,8 +13,14 @@ spec:
     metadata:
       name: zgrzyt-embed
     spec:
+      activeDeadlineSeconds: 7200
+      backoffLimit: 2
       template:
         spec:
+          automountServiceAccountToken: false
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
           containers:
             - name: zgrzyt-embed
               image: ghcr.io/mikolajbielinski/zgrzyt-embed:main@sha256:e053129fb39115b0e03e58b917a8a894876b0257aa9e642bc9a3336184133503
@@ -24,6 +31,18 @@ spec:
                     name: embed-aws-secret
                 - secretRef:
                     name: openai-secret
+              resources:
+                requests:
+                  cpu: 25m
+                  memory: 256Mi
+                limits:
+                  memory: 512Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                runAsNonRoot: true
           imagePullSecrets:
             - name: ghcr-secret
-          restartPolicy: OnFailure
+          restartPolicy: Never

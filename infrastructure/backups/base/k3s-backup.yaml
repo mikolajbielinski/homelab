@@ -4,15 +4,21 @@ metadata:
   name: k3s-backup
 spec:
   schedule: 0 3 * * *
+  timeZone: Europe/Warsaw
   concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 21600
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
   jobTemplate:
     spec:
+      activeDeadlineSeconds: 900
       backoffLimit: 2
       template:
         spec:
           automountServiceAccountToken: false
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
           containers:
             - name: k3s-backup
               image: python:3.14-alpine@sha256:c6ead215bfd31f1e433d968853b7a769989117115b728874824e6c0a27cb96fc
@@ -39,6 +45,8 @@ spec:
                 requests:
                   cpu: 50m
                   memory: 128Mi
+                limits:
+                  memory: 512Mi
               volumeMounts:
                 - name: backups
                   mountPath: /backups
@@ -56,7 +64,7 @@ spec:
                   readOnly: true
                 - name: work
                   mountPath: /work
-          restartPolicy: OnFailure
+          restartPolicy: Never
           volumes:
             - name: backups
               persistentVolumeClaim:

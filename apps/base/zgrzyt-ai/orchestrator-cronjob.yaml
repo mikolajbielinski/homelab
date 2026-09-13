@@ -4,15 +4,21 @@ metadata:
   name: zgrzyt-orchestrator
 spec:
   schedule: '*/15 * * * *'
+  timeZone: Europe/Warsaw
   concurrencyPolicy: Forbid
   startingDeadlineSeconds: 300
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
   jobTemplate:
     spec:
+      activeDeadlineSeconds: 300
       backoffLimit: 2
       template:
         spec:
+          automountServiceAccountToken: false
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
           restartPolicy: Never
           containers:
             - name: orchestrator
@@ -28,5 +34,11 @@ spec:
                   memory: 64Mi
                 limits:
                   memory: 256Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                runAsNonRoot: true
           imagePullSecrets:
             - name: ghcr-secret

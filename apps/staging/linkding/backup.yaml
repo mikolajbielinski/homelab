@@ -4,17 +4,25 @@ metadata:
   name: linkding-backup
 spec:
   schedule: 0 5 * * *
+  timeZone: Europe/Warsaw
   concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 21600
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
   jobTemplate:
     spec:
+      activeDeadlineSeconds: 1800
+      backoffLimit: 2
       template:
         spec:
+          automountServiceAccountToken: false
           securityContext:
             fsGroup: 33
             runAsGroup: 33
+            runAsNonRoot: true
             runAsUser: 33
+            seccompProfile:
+              type: RuntimeDefault
           initContainers:
             - image: sissbruecker/linkding:1.46.2
               name: linkding-backup
@@ -23,10 +31,15 @@ spec:
                 - /tmp/scripts/run-backup.bash
               securityContext:
                 allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
               resources:
                 requests:
                   cpu: 50m
                   memory: 128Mi
+                limits:
+                  memory: 512Mi
               env:
                 - name: BACKUP_DIR
                   value: /transfer
@@ -56,6 +69,15 @@ spec:
                 - --verbose
               securityContext:
                 allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+                limits:
+                  memory: 128Mi
               volumeMounts:
                 - mountPath: /transfer
                   name: transfer-volume
@@ -66,7 +88,7 @@ spec:
                 - name: known-hosts
                   mountPath: /etc/sftp-client/hosts
                   readOnly: true
-          restartPolicy: OnFailure
+          restartPolicy: Never
           volumes:
             - name: linkding-data
               persistentVolumeClaim:

@@ -31,7 +31,26 @@ spec:
     alertmanager:
       alertmanagerSpec:
         configSecret: alertmanager-ntfy
+        resources:
+          requests:
+            cpu: 10m
+            memory: 64Mi
+          limits:
+            memory: 128Mi
     grafana:
+      resources:
+        requests:
+          cpu: 25m
+          memory: 192Mi
+        limits:
+          memory: 384Mi
+      sidecar:
+        resources:
+          requests:
+            cpu: 10m
+            memory: 96Mi
+          limits:
+            memory: 192Mi
       dashboardProviders:
         dashboardproviders.yaml:
           apiVersion: 1
@@ -79,3 +98,32 @@ spec:
           - secretName: grafana-general-tls
             hosts:
               - grafana.mbielinski.com
+    kube-state-metrics:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          memory: 96Mi
+    prometheus-node-exporter:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 24Mi
+        limits:
+          memory: 64Mi
+    prometheusOperator:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 48Mi
+        limits:
+          memory: 128Mi
+    prometheus:
+      prometheusSpec:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 768Mi
+          limits:
+            memory: 1536Mi

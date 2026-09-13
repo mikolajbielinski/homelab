@@ -5,11 +5,19 @@ metadata:
   namespace: renovate
 spec:
   schedule: '0 6 * * *'
+  timeZone: Europe/Warsaw
   concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 21600
   jobTemplate:
     spec:
+      activeDeadlineSeconds: 3600
+      backoffLimit: 1
       template:
         spec:
+          automountServiceAccountToken: false
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
           containers:
             - image: renovate/renovate:44.69.14
               name: renovate
@@ -20,4 +28,16 @@ spec:
                     name: renovate-container-env
                 - configMapRef:
                     name: renovate-configmap
+              resources:
+                requests:
+                  cpu: 500m
+                  memory: 768Mi
+                limits:
+                  memory: 1536Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                runAsNonRoot: true
           restartPolicy: Never
