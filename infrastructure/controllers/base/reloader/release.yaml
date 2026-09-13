@@ -1,0 +1,39 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: reloader
+  namespace: reloader
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: reloader
+      version: 2.2.17
+      sourceRef:
+        kind: HelmRepository
+        name: stakater
+        namespace: reloader
+      interval: 24h
+  upgrade:
+    remediation:
+      retries: 2
+  driftDetection:
+    mode: enabled
+  values:
+    reloader:
+      ignoreCronJobs: true
+      ignoreJobs: true
+      reloadStrategy: annotations
+      deployment:
+        containerSecurityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            memory: 128Mi

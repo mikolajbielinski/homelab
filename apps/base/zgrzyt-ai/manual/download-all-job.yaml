@@ -4,8 +4,14 @@ metadata:
   name: zgrzyt-download-all
   namespace: zgrzyt-ai
 spec:
+  activeDeadlineSeconds: 21600
+  backoffLimit: 1
   template:
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: zgrzyt
           image: ghcr.io/mikolajbielinski/zgrzyt-download:main@sha256:2cd191c02f00bb6fa6a7808cc3a2ca5c032f87658efac0ed6436ea946b70cd29
@@ -15,10 +21,22 @@ spec:
           envFrom:
             - configMapRef:
                 name: zgrzyt-download-all-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
       imagePullSecrets:
         - name: ghcr-secret
       volumes:
         - name: zgrzyt-podcasts
           persistentVolumeClaim:
             claimName: zgrzyt-podcasts
-      restartPolicy: OnFailure
+      restartPolicy: Never

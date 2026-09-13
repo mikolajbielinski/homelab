@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: zgrzyt-frontend
+  annotations:
+    reloader.stakater.com/auto: "true"
 spec:
   replicas: 1
   selector:
@@ -12,6 +14,10 @@ spec:
       labels:
         app: zgrzyt-frontend
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: zgrzyt-frontend
           image: ghcr.io/mikolajbielinski/zgrzyt-frontend:main@sha256:f0c08726c86343ccbfbb1d0f71584b0fff0726fc1e4c4d58a8d39db3243db23f
@@ -20,6 +26,35 @@ spec:
           envFrom:
             - configMapRef:
                 name: zgrzyt-frontend-config
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            failureThreshold: 3
+            periodSeconds: 30
+            timeoutSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            failureThreshold: 3
+            periodSeconds: 10
+            timeoutSeconds: 3
+          startupProbe:
+            httpGet:
+              path: /
+              port: 80
+            failureThreshold: 12
+            periodSeconds: 5
+            timeoutSeconds: 3
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
       imagePullSecrets:
         - name: ghcr-secret
 ---

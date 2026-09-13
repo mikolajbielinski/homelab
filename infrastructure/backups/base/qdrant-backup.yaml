@@ -4,15 +4,21 @@ metadata:
   name: qdrant-backup
 spec:
   schedule: 0 4 * * *
+  timeZone: Europe/Warsaw
   concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 21600
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
   jobTemplate:
     spec:
+      activeDeadlineSeconds: 1800
       backoffLimit: 2
       template:
         spec:
           automountServiceAccountToken: false
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
           initContainers:
             - name: prepare-backup-directory
               image: curlimages/curl:8.16.0@sha256:463eaf6072688fe96ac64fa623fe73e1dbe25d8ad6c34404a669ad3ce1f104b6
@@ -25,11 +31,21 @@ spec:
                   && chmod 0750 /backups/qdrant /backups/qdrant/upload
               securityContext:
                 allowPrivilegeEscalation: false
+                capabilities:
+                  add:
+                    - CHOWN
+                    - DAC_OVERRIDE
+                    - DAC_READ_SEARCH
+                    - FOWNER
+                  drop:
+                    - ALL
                 runAsUser: 0
               resources:
                 requests:
                   cpu: 10m
                   memory: 16Mi
+                limits:
+                  memory: 64Mi
               volumeMounts:
                 - name: backups
                   mountPath: /backups
@@ -48,19 +64,24 @@ spec:
                   value: /backups/qdrant/upload
               securityContext:
                 allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
                 runAsGroup: 65532
                 runAsUser: 65532
               resources:
                 requests:
                   cpu: 10m
                   memory: 32Mi
+                limits:
+                  memory: 128Mi
               volumeMounts:
                 - name: backups
                   mountPath: /backups
                 - name: scripts
                   mountPath: /scripts
                   readOnly: true
-          restartPolicy: OnFailure
+          restartPolicy: Never
           volumes:
             - name: backups
               persistentVolumeClaim:

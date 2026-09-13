@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ntfy
+  annotations:
+    reloader.stakater.com/auto: "true"
 spec:
   replicas: 1
   strategy:
@@ -14,6 +16,10 @@ spec:
       labels:
         app: ntfy
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: ntfy
           image: binwiederhier/ntfy:v2.28.0
@@ -50,6 +56,8 @@ spec:
               memory: 32Mi
             limits:
               memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
       volumes:
         - name: config
           configMap:

@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: zgrzyt-speakers
+  annotations:
+    reloader.stakater.com/auto: "true"
 spec:
   replicas: 1
   selector:
@@ -12,6 +14,10 @@ spec:
       labels:
         app: zgrzyt-speakers
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: zgrzyt-speakers
           image: ghcr.io/mikolajbielinski/zgrzyt-speakers:main@sha256:33e3caebf141b46f5789226550ab5f322bd934414b30f2dbb537294c8e5eaaec
@@ -20,6 +26,36 @@ spec:
           envFrom:
             - secretRef:
                 name: speakers-secret
+          livenessProbe:
+            tcpSocket:
+              port: 3000
+            failureThreshold: 3
+            periodSeconds: 30
+            timeoutSeconds: 3
+          readinessProbe:
+            tcpSocket:
+              port: 3000
+            failureThreshold: 3
+            periodSeconds: 10
+            timeoutSeconds: 3
+          startupProbe:
+            tcpSocket:
+              port: 3000
+            failureThreshold: 18
+            periodSeconds: 5
+            timeoutSeconds: 3
+          resources:
+            requests:
+              cpu: 10m
+              memory: 96Mi
+            limits:
+              memory: 192Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
       imagePullSecrets:
         - name: ghcr-secret
 ---
