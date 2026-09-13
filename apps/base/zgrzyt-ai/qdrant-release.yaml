@@ -18,15 +18,6 @@ spec:
                 path: /spec/template/spec/automountServiceAccountToken
                 value: false
               - op: add
-                path: /spec/template/spec/securityContext/seccompProfile
-                value:
-                  type: RuntimeDefault
-              - op: add
-                path: /spec/template/spec/containers/0/securityContext/capabilities
-                value:
-                  drop:
-                    - ALL
-              - op: add
                 path: /spec/template/spec/containers/0/livenessProbe
                 value:
                   httpGet:
@@ -56,8 +47,23 @@ spec:
   driftDetection:
     mode: enabled
   values:
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      privileged: false
+      readOnlyRootFilesystem: true
+      runAsGroup: 2000
+      runAsNonRoot: true
+      runAsUser: 1000
     persistence:
       size: 10Gi
+    podSecurityContext:
+      fsGroup: 3000
+      fsGroupChangePolicy: Always
+      seccompProfile:
+        type: RuntimeDefault
     resources:
       requests:
         cpu: 100m
