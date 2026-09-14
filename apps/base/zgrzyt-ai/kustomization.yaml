@@ -20,6 +20,7 @@ resources:
   - embed-cronjob.yaml
   - backend-configmap.yaml
   - backend-deployment.yaml
+  - backend-network-policy.yaml
   - frontend-configmap.yaml
   - frontend-deployment.yaml
   - frontend-ingress.yaml
