@@ -6,13 +6,7 @@ resource "aws_key_pair" "zgrzyt" {
 resource "aws_security_group" "zgrzyt" {
   name        = "zgrzyt-ai"
   description = "SSH + outbound for zgrzyt-ai EC2"
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  ingress     = []
 
   egress {
     from_port   = 0
@@ -37,6 +31,11 @@ resource "aws_iam_role" "zgrzyt_ec2" {
       }
     ]
   })
+}
+
+resource "aws_iam_role_policy_attachment" "zgrzyt_ec2_ssm" {
+  role       = aws_iam_role.zgrzyt_ec2.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
 resource "aws_iam_role_policy" "zgrzyt_ec2_s3" {
@@ -105,6 +104,7 @@ resource "aws_instance" "zgrzyt" {
   depends_on = [
     aws_iam_role_policy.zgrzyt_ec2_huggingface,
     aws_iam_role_policy.zgrzyt_ec2_s3,
+    aws_iam_role_policy_attachment.zgrzyt_ec2_ssm,
   ]
 
   tags = {
