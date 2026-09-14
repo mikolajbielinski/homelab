@@ -24,7 +24,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           initContainers:
-            - image: sissbruecker/linkding:1.46.2
+            - image: sissbruecker/linkding:1.47.0
               name: linkding-backup
               command:
                 - /bin/bash
