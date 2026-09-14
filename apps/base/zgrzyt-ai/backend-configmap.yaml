@@ -6,5 +6,5 @@ data:
   QDRANT_URL: "http://qdrant.zgrzyt-ai.svc.cluster.local:6333"
   COLLECTION_NAME: "zgrzyt-transcripts"
   EMBEDDING_MODEL: "text-embedding-3-large"
-  CHAT_MODEL: "gpt-5.4"
+  CHAT_MODEL: "gpt-5.6-luna"
   SEARCH_LIMIT: "10"

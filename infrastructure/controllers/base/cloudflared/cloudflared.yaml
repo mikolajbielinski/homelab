@@ -113,6 +113,8 @@ data:
     # from the internet to cloudflared, run `cloudflared tunnel route dns <tunnel> <hostname>`.
     # E.g. `cloudflared tunnel route dns example-tunnel tunnel.example.com`.
     ingress:
+    - hostname: zgrzyt.mbielinski.com
+      service: http://zgrzyt-frontend.zgrzyt-ai.svc.cluster.local:80
     - hostname: linkding.mbielinski.com
       service: http://linkding.linkding.svc.cluster.local:9090
     - hostname: speakers.mbielinski.com
