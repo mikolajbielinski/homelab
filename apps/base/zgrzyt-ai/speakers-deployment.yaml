@@ -20,7 +20,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: zgrzyt-speakers
-          image: ghcr.io/mikolajbielinski/zgrzyt-speakers:main@sha256:33e3caebf141b46f5789226550ab5f322bd934414b30f2dbb537294c8e5eaaec
+          image: ghcr.io/mikolajbielinski/zgrzyt-speakers:main@sha256:38c3ed0c091c46d50321a688441a30130d1f4251e3d83bd9ef5d3450667f4392
           ports:
             - containerPort: 3000
           envFrom:
