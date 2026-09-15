@@ -22,7 +22,7 @@ spec:
           restartPolicy: Never
           containers:
             - name: orchestrator
-              image: ghcr.io/mikolajbielinski/zgrzyt-orchestrator:main@sha256:61fc7a6742c5a835704d21756994f3e7286574f16109d5ae9c2830296910cda7
+              image: ghcr.io/mikolajbielinski/zgrzyt-orchestrator:main@sha256:b226717623ad07de0218385ed5888cd3b651f7914bdaed71e1bd54db1039a6f4
               envFrom:
                 - configMapRef:
                     name: zgrzyt-orchestrator-config
