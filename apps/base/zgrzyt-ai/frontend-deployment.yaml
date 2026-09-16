@@ -20,7 +20,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: zgrzyt-frontend
-          image: ghcr.io/mikolajbielinski/zgrzyt-frontend:main@sha256:7a00aafce7b28136401b9e4fe7109393ce066ca3a8cb981edae5076958cb6099
+          image: ghcr.io/mikolajbielinski/zgrzyt-frontend:main@sha256:1388beabf6a4bcf1ebbcaa378e5ff026ea62fad5b08036d4ab0a06c9d846cb63
           ports:
             - containerPort: 80
           envFrom:
