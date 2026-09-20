@@ -13,6 +13,7 @@ spec:
     metadata:
       name: zgrzyt-embed
     spec:
+      ttlSecondsAfterFinished: 172800
       activeDeadlineSeconds: 7200
       backoffLimit: 2
       template:
