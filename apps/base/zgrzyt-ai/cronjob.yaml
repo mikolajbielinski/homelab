@@ -13,6 +13,7 @@ spec:
     metadata:
       name: zgrzyt-download-newest
     spec:
+      ttlSecondsAfterFinished: 172800
       activeDeadlineSeconds: 1800
       backoffLimit: 2
       template:
