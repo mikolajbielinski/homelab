@@ -21,7 +21,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           containers:
-            - image: rclone/rclone:1.75.1
+            - image: rclone/rclone:1.75.2
               name: upload-backups
               envFrom:
                 - secretRef:

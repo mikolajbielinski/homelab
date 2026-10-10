@@ -52,7 +52,7 @@ spec:
                 - mountPath: /transfer
                   name: transfer-volume
           containers:
-            - image: rclone/rclone:1.75.1
+            - image: rclone/rclone:1.75.2
               name: transfer-backup
               command:
                 - rclone
