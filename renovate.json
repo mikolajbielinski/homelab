@@ -18,6 +18,16 @@
         "digest"
       ],
       "automerge": false
+    },
+    {
+      "description": "Flux manifests are regenerated as a whole by the flux manager; don't bump single controller images",
+      "matchManagers": [
+        "kubernetes"
+      ],
+      "matchFileNames": [
+        "clusters/**/flux-system/gotk-components.yaml"
+      ],
+      "enabled": false
     }
   ],
   "prHourlyLimit": 0,
