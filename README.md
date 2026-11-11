@@ -74,6 +74,8 @@ monitoring/
   controllers/                 Observability stack
   configs/                     Dashboards, alerts and encrypted configuration
 docs/                          Design notes, audits and operational decisions
+scripts/
+  k3s-upgrade/                 k3s upgrade script and procedure
 ```
 
 ## Validation and delivery
