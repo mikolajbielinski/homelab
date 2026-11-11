@@ -35,7 +35,7 @@ spec:
               prefix: index_
               period: 24h
       limits_config:
-        retention_period: 168h
+        retention_period: 720h
         volume_enabled: true
       compactor:
         retention_enabled: true
