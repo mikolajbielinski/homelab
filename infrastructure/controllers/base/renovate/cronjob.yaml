@@ -20,7 +20,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           containers:
-            - image: renovate/renovate:44.234.0
+            - image: renovate/renovate:45.3.2
               name: renovate
               args:
                 - mikolajbielinski/homelab
